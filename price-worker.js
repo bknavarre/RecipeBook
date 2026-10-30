@@ -30,11 +30,7 @@ export default {
   }
 };
 async function krogerToken(env) {
-  const res = await fetch("https://api.kroger.com/v1/connect/oauth2/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: "Basic " + btoa(`${env.KROGER_CLIENT_ID}:${env.KROGER_CLIENT_SECRET}`) },
-    body: "grant_type=client_credentials&scope=product.compact"
-  });
+  const res = await fetch("https://api.kroger.com/v1/connect/oauth2/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: "Basic " + btoa(`${env.KROGER_CLIENT_ID}:${env.KROGER_CLIENT_SECRET}`) }, body: "grant_type=client_credentials&scope=product.compact" });
   if (!res.ok) throw new Error("Kroger auth failed " + res.status);
   return (await res.json()).access_token;
 }
@@ -52,23 +48,14 @@ async function kroger(q, zip, env) {
     const aisle = (p.aisleLocations || [])[0];
     const front = (p.images || []).find(i => i.perspective === "front") || (p.images || [])[0];
     const img = front?.sizes?.find(s => s.size === "medium") || front?.sizes?.[0];
-    return { name: p.description, price: price || null, unitPrice: null, size: item.size || "",
-      aisle: aisle ? (aisle.description || ("Aisle " + aisle.number)) : "", url: p.productId ? `https://www.kroger.com/p/item/${p.productId}` : "", image: img?.url || "" };
+    return { name: p.description, price: price || null, unitPrice: null, size: item.size || "", aisle: aisle ? (aisle.description || ("Aisle " + aisle.number)) : "", url: p.productId ? `https://www.kroger.com/p/item/${p.productId}` : "", image: img?.url || "" };
   }).filter(p => p.name);
 }
 async function heb(q, env) {
   if (!env.APIFY_TOKEN) throw new Error("H-E-B lookup not configured (APIFY_TOKEN)");
-  const res = await fetch(`https://api.apify.com/v2/acts/${HEB_ACTOR}/run-sync-get-dataset-items?token=${env.APIFY_TOKEN}`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ urls: [`https://www.heb.com/search?q=${encodeURIComponent(q)}`], ignore_url_failures: true, max_items_per_url: 15 })
-  });
+  const res = await fetch(`https://api.apify.com/v2/acts/${HEB_ACTOR}/run-sync-get-dataset-items?token=${env.APIFY_TOKEN}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ urls: [`https://www.heb.com/search?q=${encodeURIComponent(q)}`], ignore_url_failures: true, max_items_per_url: 15 }) });
   if (!res.ok) throw new Error("H-E-B lookup failed " + res.status);
   const items = await res.json();
   const num = (v) => { if (v == null) return null; const m = String(typeof v === "object" ? v.amount ?? v.value ?? "" : v).match(/[\d.]+/); return m ? Number(m[0]) : null; };
-  return (Array.isArray(items) ? items : []).map(x => ({
-    name: x.name || x.title || x.productName || x.displayName || "",
-    price: num(x.price ?? x.currentPrice ?? x.salePrice ?? x.listPrice ?? x.pricing?.price), unitPrice: num(x.unitPrice ?? x.pricePerUnit),
-    size: x.size || x.packageSize || "", aisle: x.aisle || x.aisleLocation || x.productLocation || x.location || "",
-    url: x.url || x.productUrl || "", image: x.image || x.imageUrl || (Array.isArray(x.images) ? x.images[0] : "") || ""
-  })).filter(p => p.name);
+  return (Array.isArray(items) ? items : []).map(x => ({ name: x.name || x.title || x.productName || x.displayName || "", price: num(x.price ?? x.currentPrice ?? x.salePrice ?? x.listPrice ?? x.pricing?.price), unitPrice: num(x.unitPrice ?? x.pricePerUnit), size: x.size || x.packageSize || "", aisle: x.aisle || x.aisleLocation || x.productLocation || x.location || "", url: x.url || x.productUrl || "", image: x.image || x.imageUrl || (Array.isArray(x.images) ? x.images[0] : "") || "" })).filter(p => p.name);
 }

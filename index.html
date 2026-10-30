@@ -40,6 +40,10 @@
   <div id="root"></div>
 
   <script type="text/babel">
+    // ===== ACCOUNTS: paste your Firebase web app config here (see SETUP.md). =====
+    // ===== Leave it as null to run without accounts (data stays on each device). =====
+    const FIREBASE_CONFIG = null;
+
     const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
     const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -54,7 +58,7 @@
 
     const sampleRecipes = [
       { id: "r1", title: "Lemon Garlic Chicken & Broccoli", category: "Dinner", dietTags: ["High-Protein", "Low-Carb", "Heart-Healthy"], image: null, url: null, rating: 4.5, favorite: true, baseServings: 4, nutrition: { calories: 420, protein: 42, carbs: 12, fat: 22, fiber: 5 }, ingredients: [ { name: "Chicken breast", amount: 1.5, unit: "lb", aisle: "Meat & Seafood" }, { name: "Broccoli florets", amount: 4, unit: "cups", aisle: "Produce" }, { name: "Garlic", amount: 4, unit: "cloves", aisle: "Produce" }, { name: "Lemon", amount: 2, unit: "", aisle: "Produce" }, { name: "Olive oil", amount: 2, unit: "tbsp", aisle: "Pantry / Canned" }, { name: "Salt & pepper", amount: 1, unit: "to taste", aisle: "Spices & Baking" } ], instructions: "1. Season chicken with salt, pepper, garlic.\n2. Sear in olive oil 5-6 min per side.\n3. Add broccoli and lemon juice, cover 4 min.\n4. Serve hot.", timesUsed: 3 },
-      { id: "r2", title: "Turkey Chili (High Protein)", category: "Dinner", dietTags: ["High-Protein", "Low-Calorie", "Heart-Healthy"], image: null, url: null, rating: 4.8, favorite: false, baseServings: 6, nutrition: { calories: 310, protein: 34, carbs: 28, fat: 8, fiber: 9 }, ingredients: [ { name: "Ground turkey", amount: 1.5, unit: "lb", aisle: "Meat & Seafood" }, { name: "Kidney beans", amount: 2, unit: "cans", aisle: "Pantry / Canned" }, { name: "Diced tomatoes", amount: 1, unit: "can", aisle: "Pantry / Canned" }, { name: "Onion", amount: 1, unit: "large", aisle: "Produce" }, { name: "Bell pepper", amount: 1, unit: "", aisle: "Produce" }, { name: "Chili powder", amount: 2, unit: "tbsp", aisle: "Spices & Baking" } ], instructions: "Brown turkey, add onion & pepper. Stir in remaining ingredients. Simmer 25 min.", timesUsed: 7 },
+      { id: "r2", title: "Turkey Chili (High Protein)", category: "Dinner", dietTags: ["High-Protein", "Low-Calorie", "Heart-Healthy"], image: null, url: null, rating: 4.8, favorite: false, baseServings: 6, nutrition: { calories: 310, protein: 34, carbs: 28, fat: 8, fiber: 9 }, ingredients: [ { name: "Ground turkey", amount: 1.5, unit: "lb", aisle: "Meat & Seafood" }, { name: "Kidney beans", amount: 2, unit: "cans", aisle: "Pantry / Canned" }, { name: "Diced tomatoes", amount: 1, unit: "can", aisle: "Pantry / Canned" }, { name: "Onion", amount: 1, unit: "large", aisle: "Produce" }, { name: "Bell pepper", amount: 1, unit: "", aisle: "Produce" }, { name: "Chili powder", amount: 2, unit: "tbsp", aisle: "Spices & Baking" } ], instructions: "Brown turkey, add onion & pepper. Stir in remaining ingredients. Simmer 25 min.", timesUsed: 2 },
       { id: "r3", title: "Salmon with Asparagus", category: "Dinner", dietTags: ["High-Protein", "Keto", "Heart-Healthy"], image: null, url: null, rating: 4.7, favorite: true, baseServings: 2, nutrition: { calories: 480, protein: 38, carbs: 8, fat: 32, fiber: 4 }, ingredients: [ { name: "Salmon fillets", amount: 2, unit: "", aisle: "Meat & Seafood" }, { name: "Asparagus", amount: 1, unit: "bunch", aisle: "Produce" }, { name: "Butter", amount: 2, unit: "tbsp", aisle: "Dairy & Eggs" }, { name: "Lemon", amount: 1, unit: "", aisle: "Produce" }, { name: "Garlic", amount: 2, unit: "cloves", aisle: "Produce" } ], instructions: "Season salmon. Roast with asparagus at 400°F for 12-15 min. Finish with butter & lemon.", timesUsed: 4 },
       { id: "r4", title: "Chicken Stir-Fry Bowl", category: "Dinner", dietTags: ["High-Protein", "Low-Calorie"], image: null, url: null, rating: 4.2, favorite: false, baseServings: 4, nutrition: { calories: 380, protein: 36, carbs: 32, fat: 12, fiber: 6 }, ingredients: [ { name: "Chicken breast", amount: 1.25, unit: "lb", aisle: "Meat & Seafood" }, { name: "Mixed stir-fry vegetables", amount: 4, unit: "cups", aisle: "Produce" }, { name: "Soy sauce (low sodium)", amount: 3, unit: "tbsp", aisle: "Pantry / Canned" }, { name: "Ginger", amount: 1, unit: "tbsp", aisle: "Produce" }, { name: "Brown rice (cooked)", amount: 2, unit: "cups", aisle: "Pantry / Canned" } ], instructions: "Stir-fry chicken, add vegetables and sauce. Serve over rice.", timesUsed: 2 },
       { id: "r5", title: "Greek Yogurt Chicken Salad", category: "Lunch", dietTags: ["High-Protein", "Low-Calorie", "Heart-Healthy"], image: null, url: null, rating: 4.4, favorite: false, baseServings: 4, nutrition: { calories: 290, protein: 32, carbs: 14, fat: 12, fiber: 3 }, ingredients: [ { name: "Cooked chicken breast", amount: 3, unit: "cups", aisle: "Meat & Seafood" }, { name: "Greek yogurt", amount: 1, unit: "cup", aisle: "Dairy & Eggs" }, { name: "Celery", amount: 2, unit: "stalks", aisle: "Produce" }, { name: "Red grapes", amount: 1, unit: "cup", aisle: "Produce" }, { name: "Dijon mustard", amount: 1, unit: "tbsp", aisle: "Pantry / Canned" } ], instructions: "Mix everything. Chill 30 min. Serve on lettuce or whole-grain bread.", timesUsed: 1 },
@@ -77,29 +81,21 @@
       const day = d.getDay();
       const diff = d.getDate() - day + (day === 0 ? -6 : 1);
       const monday = new Date(d.setDate(diff));
-      // Use LOCAL date parts (toISOString is UTC and can roll to the wrong day in the evening)
       const y = monday.getFullYear();
       const m = String(monday.getMonth() + 1).padStart(2, "0");
       const dd = String(monday.getDate()).padStart(2, "0");
       return `${y}-${m}-${dd}`;
     }
 
-    // ---- Storage helper: never let a full localStorage crash the app ----
     let storageWarned = false;
     function safeSave(key, value) {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-        return true;
-      } catch (e) {
-        if (!storageWarned) {
-          storageWarned = true;
-          alert("Storage is full - recent changes may not be saved. Try removing some uploaded photos.");
-        }
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+      catch (e) {
+        if (!storageWarned) { storageWarned = true; alert("Storage is full - recent changes may not be saved on this device. Try removing some uploaded photos."); }
         return false;
       }
     }
 
-    // ---- Shrink photos before storing (localStorage is ~5 MB total). Accepts File or Blob. ----
     function compressImage(file, maxSize = 800, quality = 0.75) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -121,7 +117,6 @@
       });
     }
 
-    // ---- Aisle guessing for imported / AI ingredients ----
     const AISLE_KEYWORDS = [
       ["Meat & Seafood", /chicken|beef|pork|turkey|salmon|shrimp|fish|bacon|sausage|steak|ham|tuna|cod|tilapia|ground (beef|turkey|pork|chicken)/],
       ["Dairy & Eggs", /milk|cheese|butter|cream|yogurt|egg(s)?\b|sour cream|parmesan|mozzarella|cheddar/],
@@ -140,7 +135,6 @@
       return fallback;
     }
 
-    // ---- Parse "1 1/2 cups chopped onion" -> { amount, unit, name } ----
     const UNICODE_FRAC = { "½": .5, "⅓": 1/3, "⅔": 2/3, "¼": .25, "¾": .75, "⅛": .125, "⅜": .375, "⅝": .625, "⅞": .875 };
     const UNITS = ["cups","cup","c","tablespoons","tablespoon","tbsp","tbs","tbl","teaspoons","teaspoon","tsp","pounds","pound","lbs","lb","ounces","ounce","oz","grams","gram","g","kilograms","kg","ml","milliliters","liters","l","cloves","clove","cans","can","packages","package","pkg","slices","slice","pinch","dash","bunch","stalks","stalk","large","medium","small","quarts","quart","qt","pints","pint","pt","sticks","stick"];
     function parseIngredientLine(line) {
@@ -185,7 +179,6 @@
         style={{ width: size, height: size }} aria-label="Loading" />
     );
 
-    // Soft, rounded duotone icons for the bottom tabs
     const TabIcon = ({ name }) => {
       const p = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" };
       const soft = { fill: "currentColor", fillOpacity: 0.16, stroke: "none" };
@@ -218,17 +211,13 @@
       return <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">{icons[name]}</svg>;
     };
 
-    // ---- Split instructions into cooking-mode steps ----
     function splitSteps(text) {
       const clean = String(text || "").split(/\n/).filter(l => !/^\s*(source|notes?):/i.test(l)).join("\n").trim();
       let parts = clean.split(/\n+/).map(s => s.replace(/^\s*(step\s*)?\d+\s*[.):-]\s*/i, "").trim()).filter(Boolean);
-      if (parts.length === 1 && parts[0].length > 100) {
-        parts = parts[0].split(/(?<=[.!?])\s+(?=[A-Z])/).map(s => s.trim()).filter(Boolean);
-      }
+      if (parts.length === 1 && parts[0].length > 100) parts = parts[0].split(/(?<=[.!?])\s+(?=[A-Z])/).map(s => s.trim()).filter(Boolean);
       return parts.length ? parts : ["No instructions yet. Tap Edit on the recipe to add them."];
     }
 
-    // ========== COOKING MODE ==========
     function CookingMode({ recipe, onClose }) {
       const steps = useMemo(() => splitSteps(recipe.instructions), [recipe.instructions]);
       const [i, setI] = useState(0);
@@ -236,16 +225,12 @@
       const [awake, setAwake] = useState(null);
       const startX = useRef(null);
       const startY = useRef(null);
-
-      // Keep the screen on while cooking mode is open (Wake Lock API)
       useEffect(() => {
         let lock = null;
         const request = async () => {
           try {
-            if ("wakeLock" in navigator) {
-              lock = await navigator.wakeLock.request("screen");
-              setAwake(true);
-            } else setAwake(false);
+            if ("wakeLock" in navigator) { lock = await navigator.wakeLock.request("screen"); setAwake(true); }
+            else setAwake(false);
           } catch { setAwake(false); }
         };
         request();
@@ -260,14 +245,12 @@
           try { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch {}
         };
       }, []);
-
       const go = (n) => setI(x => Math.max(0, Math.min(steps.length - 1, x + n)));
       useEffect(() => {
         const onKey = (e) => { if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); if (e.key === "Escape") onClose(); };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
       }, [steps.length]);
-
       const onTouchStart = (e) => { startX.current = e.touches[0].clientX; startY.current = e.touches[0].clientY; };
       const onTouchMove = (e) => {
         if (startX.current == null) return;
@@ -275,28 +258,18 @@
         const dy = e.touches[0].clientY - startY.current;
         if (Math.abs(dx) > Math.abs(dy)) setDrag(dx);
       };
-      const onTouchEnd = () => {
-        if (drag < -60) go(1); else if (drag > 60) go(-1);   // swipe left = next (like turning a page)
-        setDrag(0); startX.current = null;
-      };
-
+      const onTouchEnd = () => { if (drag < -60) go(1); else if (drag > 60) go(-1); setDrag(0); startX.current = null; };
       return (
         <div className="fixed inset-0 z-[80] bg-cream-50 flex flex-col select-none">
           <div className="flex items-center justify-between px-5 pt-5 pb-2 gap-3">
             <div className="min-w-0">
               <p className="text-sm text-cocoa-500 truncate">{recipe.title}</p>
-              <p className={`text-xs ${awake ? "text-emerald-700" : "text-stone-400"}`}>
-                {awake ? "☀ Screen will stay on" : awake === false ? "Screen-on not supported in this browser" : ""}
-              </p>
+              <p className={`text-xs ${awake ? "text-emerald-700" : "text-stone-400"}`}>{awake ? "☀ Screen will stay on" : awake === false ? "Screen-on not supported in this browser" : ""}</p>
             </div>
             <button onClick={onClose} className="w-11 h-11 rounded-full bg-white shadow text-xl flex-shrink-0" aria-label="Close cooking mode">✕</button>
           </div>
           <div className="flex-1 overflow-hidden" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-            <div className="h-full flex" style={{
-              width: `${steps.length * 100}%`,
-              transform: `translateX(calc(${-i * (100 / steps.length)}% + ${drag}px))`,
-              transition: drag ? "none" : "transform 280ms ease"
-            }}>
+            <div className="h-full flex" style={{ width: `${steps.length * 100}%`, transform: `translateX(calc(${-i * (100 / steps.length)}% + ${drag}px))`, transition: drag ? "none" : "transform 280ms ease" }}>
               {steps.map((step, idx) => (
                 <div key={idx} className="h-full overflow-y-auto px-6 pb-6" style={{ width: `${100 / steps.length}%` }}>
                   <div className="flex items-end gap-2 mt-2 mb-5">
@@ -324,7 +297,6 @@
       );
     }
 
-    // ---- fetch with a time limit until the server starts answering ----
     async function fetchWithTimeout(url, opts = {}, ms = 15000) {
       const ctrl = new AbortController();
       if (opts.signal) opts.signal.addEventListener("abort", () => ctrl.abort());
@@ -332,8 +304,6 @@
       try { return await fetch(url, { ...opts, signal: ctrl.signal }); }
       finally { clearTimeout(t); }
     }
-
-    // ---- Read a response body, only giving up if it STOPS sending data (activity-based timeout) ----
     async function readBodyWithIdle(res, ctrl, idleMs, onBytes) {
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -351,8 +321,6 @@
       } finally { clearTimeout(timer); }
       return text;
     }
-
-    // ---- Fetch a web page through public CORS proxies (tries several) ----
     const CORS_PROXIES = [
       (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
       (u) => "https://corsproxy.io/?url=" + encodeURIComponent(u),
@@ -363,7 +331,7 @@
       for (let k = 0; k < CORS_PROXIES.length; k++) {
         const ctrl = new AbortController();
         onStatus && onStatus(`Loading page (source ${k + 1} of ${CORS_PROXIES.length})…`);
-        const connectTimer = setTimeout(() => ctrl.abort(), startMs); // time allowed to START answering
+        const connectTimer = setTimeout(() => ctrl.abort(), startMs);
         try {
           const res = await fetch(CORS_PROXIES[k](url), { signal: ctrl.signal });
           clearTimeout(connectTimer);
@@ -394,7 +362,6 @@
         || html.match(/<link[^>]+rel=["']image_src["'][^>]*href=["']([^"']+)["']/i);
       return m ? absUrl(decodeHtml(m[1]), base) : null;
     }
-
     const num0 = (v) => { const m = String(v ?? "").match(/[\d.]+/); return m ? Math.round(Number(m[0])) : 0; };
     const pickCategory = (txt) => ["Breakfast", "Lunch", "Dinner", "Snack", "Dessert"].find(c => String(txt || "").toLowerCase().includes(c.toLowerCase())) || "Dinner";
     function schemaToRecipe(rec, pageUrl, html) {
@@ -415,13 +382,9 @@
       const ingredients = (rec.recipeIngredient || rec.ingredients || []).slice(0, 40).map(line => parseIngredientLine(decodeHtml(line)));
       const src = rec.url && /^https?:/.test(rec.url) ? rec.url : pageUrl;
       return {
-        title: decodeHtml(rec.name) || "Imported Recipe",
-        category: pickCategory(cat), dietTags: [],
+        title: decodeHtml(rec.name) || "Imported Recipe", category: pickCategory(cat), dietTags: [],
         baseServings: num0(yieldVal) || 4,
-        nutrition: {
-          calories: num0(n.calories) || 400, protein: num0(n.proteinContent) || 25,
-          carbs: num0(n.carbohydrateContent) || 30, fat: num0(n.fatContent) || 15, fiber: num0(n.fiberContent) || 5
-        },
+        nutrition: { calories: num0(n.calories) || 400, protein: num0(n.proteinContent) || 25, carbs: num0(n.carbohydrateContent) || 30, fat: num0(n.fatContent) || 15, fiber: num0(n.fiberContent) || 5 },
         ingredients: ingredients.length ? ingredients : [{ name: "Ingredient (edit)", amount: 1, unit: "", aisle: "Other" }],
         instructions: (steps.length ? steps.map((t, i) => `${i + 1}. ${t}`).join("\n") : "Add instructions.") + (src ? "\n\nSource: " + src : ""),
         image, url: src || ""
@@ -441,22 +404,17 @@
       };
       for (const b of html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
         const raw = b[1].trim().replace(/^<!--|-->$/g, "");
-        try { walk(JSON.parse(raw)); }
-        catch { try { walk(JSON.parse(raw.replace(/[\u0000-\u001F]+/g, " "))); } catch {} }
+        try { walk(JSON.parse(raw)); } catch { try { walk(JSON.parse(raw.replace(/[\u0000-\u001F]+/g, " "))); } catch {} }
       }
       return out;
     }
-    function extractJsonLdRecipe(html, pageUrl) {
-      const rec = findJsonLdRecipes(html)[0];
-      return rec ? schemaToRecipe(rec, pageUrl, html) : null;
-    }
-
+    function extractJsonLdRecipe(html, pageUrl) { const rec = findJsonLdRecipes(html)[0]; return rec ? schemaToRecipe(rec, pageUrl, html) : null; }
     function pageText(html) {
       return html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<nav[\s\S]*?<\/nav>|<footer[\s\S]*?<\/footer>/gi, " ")
         .replace(/<\/(p|li|h\d|div|br|span|a|button)>/gi, "\n").replace(/<[^>]+>/g, " ")
         .replace(/&nbsp;/g, " ").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
     }
-    // ========== GEMINI (streaming, activity-based timeout) ==========
+    // ========== GEMINI ==========
     const RECIPE_SCHEMA = {
       type: "OBJECT",
       properties: {
@@ -464,30 +422,16 @@
         category: { type: "STRING", enum: ["Dinner", "Lunch", "Breakfast", "Snack", "Dessert"] },
         dietTags: { type: "ARRAY", items: { type: "STRING" } },
         baseServings: { type: "INTEGER" },
-        nutrition: {
-          type: "OBJECT",
-          properties: { calories: { type: "NUMBER" }, protein: { type: "NUMBER" }, carbs: { type: "NUMBER" }, fat: { type: "NUMBER" }, fiber: { type: "NUMBER" } },
-          required: ["calories", "protein", "carbs", "fat", "fiber"]
-        },
-        ingredients: {
-          type: "ARRAY",
-          items: {
-            type: "OBJECT",
-            properties: { name: { type: "STRING" }, amount: { type: "NUMBER" }, unit: { type: "STRING" }, aisle: { type: "STRING", enum: Object.keys(defaultAisles) } },
-            required: ["name", "amount", "unit", "aisle"]
-          }
-        },
+        nutrition: { type: "OBJECT", properties: { calories: { type: "NUMBER" }, protein: { type: "NUMBER" }, carbs: { type: "NUMBER" }, fat: { type: "NUMBER" }, fiber: { type: "NUMBER" } }, required: ["calories", "protein", "carbs", "fat", "fiber"] },
+        ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, amount: { type: "NUMBER" }, unit: { type: "STRING" }, aisle: { type: "STRING", enum: Object.keys(defaultAisles) } }, required: ["name", "amount", "unit", "aisle"] } },
         steps: { type: "ARRAY", items: { type: "STRING" } }
       },
       required: ["title", "category", "baseServings", "nutrition", "ingredients", "steps"]
     };
-
-    // "fast" = Gemini Flash-Lite with minimal thinking; "best" = Gemini Flash with low thinking
     const AI_MODELS = {
       fast: { id: "gemini-3.5-flash-lite", thinking: { thinkingLevel: "minimal" } },
       best: { id: "gemini-3.8-flash", thinking: { thinkingLevel: "low", includeThoughts: true } }
     };
-
     async function callGeminiRecipe(key, prompt, { signal, onProgress, mode = "fast", startMs = 120000, idleMs = 60000, maxMs = 360000 } = {}) {
       const model = AI_MODELS[mode] || AI_MODELS.fast;
       const ctrl = new AbortController();
@@ -498,25 +442,13 @@
       const kick = () => { clearTimeout(idle); idle = setTimeout(() => stop("idle"), idleMs); };
       const hard = setTimeout(() => stop("max"), maxMs);
       onProgress && onProgress({ phase: "waiting", chars: 0 });
-
       let text = "", finish = "", blocked = "";
       try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model.id}:streamGenerateContent?alt=sse`,
-          {
-            method: "POST", signal: ctrl.signal,
-            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                temperature: 0.6,
-                maxOutputTokens: 8192,
-                thinkingConfig: model.thinking,
-                responseMimeType: "application/json",
-                responseSchema: RECIPE_SCHEMA
-              }
-            })
-          });
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model.id}:streamGenerateContent?alt=sse`, {
+          method: "POST", signal: ctrl.signal,
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.6, maxOutputTokens: 8192, thinkingConfig: model.thinking, responseMimeType: "application/json", responseSchema: RECIPE_SCHEMA } })
+        });
         if (!res.ok) {
           clearTimeout(idle);
           let msg = "";
@@ -559,7 +491,6 @@
         if (e.message && !/fetch|network/i.test(e.message)) throw e;
         throw new Error("Network error - check your internet connection.");
       } finally { clearTimeout(idle); clearTimeout(hard); }
-
       if (blocked) throw new Error("Request was blocked: " + blocked);
       if (finish === "MAX_TOKENS") throw new Error("The AI's answer was cut off. Please try again.");
       let raw = text.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
@@ -573,26 +504,16 @@
       const steps = Array.isArray(parsed.steps)
         ? parsed.steps.map((s, i) => `${i + 1}. ${String(s).replace(/\n/g, " ").replace(/^\s*(step\s*)?\d+\s*[.):-]\s*/i, "")}`).join("\n")
         : (parsed.instructions || "Follow standard cooking method.");
-      const ings = (Array.isArray(parsed.ingredients) ? parsed.ingredients : []).map(i => ({
-        name: String(i.name || "Ingredient"), amount: Number(i.amount) || 1, unit: String(i.unit || ""),
-        aisle: Object.keys(defaultAisles).includes(i.aisle) ? i.aisle : guessAisle(i.name)
-      }));
+      const ings = (Array.isArray(parsed.ingredients) ? parsed.ingredients : []).map(i => ({ name: String(i.name || "Ingredient"), amount: Number(i.amount) || 1, unit: String(i.unit || ""), aisle: Object.keys(defaultAisles).includes(i.aisle) ? i.aisle : guessAisle(i.name) }));
       return {
         title: String(parsed.title), category: parsed.category || "Dinner",
-        dietTags: Array.isArray(parsed.dietTags) ? parsed.dietTags : [],
-        baseServings: Number(parsed.baseServings) || 4,
-        nutrition: {
-          calories: Number(parsed.nutrition?.calories) || 400, protein: Number(parsed.nutrition?.protein) || 25,
-          carbs: Number(parsed.nutrition?.carbs) || 30, fat: Number(parsed.nutrition?.fat) || 15, fiber: Number(parsed.nutrition?.fiber) || 5
-        },
+        dietTags: Array.isArray(parsed.dietTags) ? parsed.dietTags : [], baseServings: Number(parsed.baseServings) || 4,
+        nutrition: { calories: Number(parsed.nutrition?.calories) || 400, protein: Number(parsed.nutrition?.protein) || 25, carbs: Number(parsed.nutrition?.carbs) || 30, fat: Number(parsed.nutrition?.fat) || 15, fiber: Number(parsed.nutrition?.fiber) || 5 },
         ingredients: ings.length ? ings : [{ name: "See instructions", amount: 1, unit: "", aisle: "Other" }],
         instructions: steps, image: null, url: ""
       };
     }
-    const describeAiProgress = (p) => !p ? "" :
-      p.phase === "waiting" ? "Sending your request…" :
-      p.phase === "thinking" ? "AI is thinking…" :
-      `AI is writing the recipe… (${p.chars.toLocaleString()} characters)`;
+    const describeAiProgress = (p) => !p ? "" : p.phase === "waiting" ? "Sending your request…" : p.phase === "thinking" ? "AI is thinking…" : `AI is writing the recipe… (${p.chars.toLocaleString()} characters)`;
 
     // ========== PHOTO FINDER ==========
     const PHOTO_SCAN_VERSION = 2;
@@ -622,10 +543,7 @@
     async function findPhotoCandidates(title, { unsplashKey = "", sourceUrl = "", limit = 18 } = {}) {
       const { words, queries } = dishQueries(title);
       const out = [];
-      const add = (url, thumb, credit, label, trusted, bonus = 0) => {
-        if (!url || out.some(o => o.url === url)) return;
-        out.push({ url, thumb: thumb || url, credit, score: photoScore(label, words) + bonus, trusted });
-      };
+      const add = (url, thumb, credit, label, trusted, bonus = 0) => { if (!url || out.some(o => o.url === url)) return; out.push({ url, thumb: thumb || url, credit, score: photoScore(label, words) + bonus, trusted }); };
       const tasks = [];
       if (sourceUrl && /^https?:/.test(sourceUrl) && !/themealdb\.com/.test(sourceUrl)) {
         tasks.push(fetchPageHtml(sourceUrl, null, { startMs: 12000 }).then(html => {
@@ -635,26 +553,15 @@
         }).catch(() => {}));
       }
       if (unsplashKey) {
-        tasks.push(fetchWithTimeout(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(queries[0] + " food")}&per_page=10&orientation=landscape`,
-          { headers: { Authorization: `Client-ID ${unsplashKey}` } }, 10000)
-          .then(r => r.ok ? r.json() : null)
-          .then(d => (d?.results || []).forEach(x => add(x.urls?.regular, x.urls?.small, "Unsplash · " + (x.user?.name || ""), x.alt_description || x.description || queries[0], true, 0.3)))
-          .catch(() => {}));
+        tasks.push(fetchWithTimeout(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(queries[0] + " food")}&per_page=10&orientation=landscape`, { headers: { Authorization: `Client-ID ${unsplashKey}` } }, 10000)
+          .then(r => r.ok ? r.json() : null).then(d => (d?.results || []).forEach(x => add(x.urls?.regular, x.urls?.small, "Unsplash · " + (x.user?.name || ""), x.alt_description || x.description || queries[0], true, 0.3))).catch(() => {}));
       }
-      queries.slice(0, 3).forEach(q => tasks.push(
-        fetchWithTimeout(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(q)}`, {}, 10000)
-          .then(r => r.ok ? r.json() : null)
-          .then(d => (d?.meals || []).slice(0, 4).forEach(m => add(m.strMealThumb, m.strMealThumb + "/medium", "TheMealDB · " + m.strMeal, m.strMeal, true, 0.2)))
-          .catch(() => {})));
-      queries.slice(0, 2).forEach(q => tasks.push(
-        fetchWithTimeout(`https://api.openverse.org/v1/images/?q=${encodeURIComponent(q + " food")}&page_size=12&mature=false&category=photograph`, {}, 10000)
-          .then(r => r.ok ? r.json() : null)
-          .then(d => (d?.results || []).forEach(x => add(x.url, x.thumbnail || x.url, "Openverse · " + (x.creator || x.source || ""), [x.title, ...(x.tags || []).map(t => t.name)].join(" "), false)))
-          .catch(() => {})));
+      queries.slice(0, 3).forEach(q => tasks.push(fetchWithTimeout(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(q)}`, {}, 10000)
+        .then(r => r.ok ? r.json() : null).then(d => (d?.meals || []).slice(0, 4).forEach(m => add(m.strMealThumb, m.strMealThumb + "/medium", "TheMealDB · " + m.strMeal, m.strMeal, true, 0.2))).catch(() => {})));
+      queries.slice(0, 2).forEach(q => tasks.push(fetchWithTimeout(`https://api.openverse.org/v1/images/?q=${encodeURIComponent(q + " food")}&page_size=12&mature=false&category=photograph`, {}, 10000)
+        .then(r => r.ok ? r.json() : null).then(d => (d?.results || []).forEach(x => add(x.url, x.thumbnail || x.url, "Openverse · " + (x.creator || x.source || ""), [x.title, ...(x.tags || []).map(t => t.name)].join(" "), false))).catch(() => {})));
       tasks.push(fetchWithTimeout(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=12&gsrsearch=${encodeURIComponent(queries[0] + " food")}&prop=imageinfo&iiprop=url|mime&iiurlwidth=800&format=json&origin=*`, {}, 10000)
-        .then(r => r.ok ? r.json() : null)
-        .then(d => Object.values(d?.query?.pages || {}).forEach(pg => { const ii = pg.imageinfo?.[0]; if (ii && /jpe?g|png|webp/.test(ii.mime)) add(ii.thumburl || ii.url, ii.thumburl || ii.url, "Wikimedia Commons", pg.title, false); }))
-        .catch(() => {}));
+        .then(r => r.ok ? r.json() : null).then(d => Object.values(d?.query?.pages || {}).forEach(pg => { const ii = pg.imageinfo?.[0]; if (ii && /jpe?g|png|webp/.test(ii.mime)) add(ii.thumburl || ii.url, ii.thumburl || ii.url, "Wikimedia Commons", pg.title, false); })).catch(() => {}));
       await Promise.allSettled(tasks);
       return out.sort((a, b) => b.score - a.score).slice(0, limit);
     }
@@ -666,9 +573,7 @@
     }
     function dishEmoji(title) {
       const t = String(title || "").toLowerCase();
-      const map = [[/taco|burrito|enchilada|quesadilla|fajita/, "🌮"], [/pizza/, "🍕"], [/burger|slider/, "🍔"], [/pasta|spaghetti|lasagna|noodle|mac/, "🍝"],
-        [/salad/, "🥗"], [/soup|chili|stew|chowder|curry/, "🍲"], [/egg|omelet|frittata|breakfast|pancake|waffle/, "🍳"], [/cake|cookie|pie|brownie|dessert|muffin/, "🍰"],
-        [/salmon|fish|shrimp|tuna|cod|tilapia|seafood/, "🐟"], [/chicken|turkey|wing/, "🍗"], [/steak|beef|pork|rib/, "🥩"], [/rice|bowl|stir/, "🍚"], [/sandwich|wrap|sub/, "🥪"], [/smoothie|shake/, "🥤"]];
+      const map = [[/taco|burrito|enchilada|quesadilla|fajita/, "🌮"], [/pizza/, "🍕"], [/burger|slider/, "🍔"], [/pasta|spaghetti|lasagna|noodle|mac/, "🍝"], [/salad/, "🥗"], [/soup|chili|stew|chowder|curry/, "🍲"], [/egg|omelet|frittata|breakfast|pancake|waffle/, "🍳"], [/cake|cookie|pie|brownie|dessert|muffin/, "🍰"], [/salmon|fish|shrimp|tuna|cod|tilapia|seafood/, "🐟"], [/chicken|turkey|wing/, "🍗"], [/steak|beef|pork|rib/, "🥩"], [/rice|bowl|stir/, "🍚"], [/sandwich|wrap|sub/, "🥪"], [/smoothie|shake/, "🥤"]];
       return (map.find(([re]) => re.test(t)) || [null, "🍽️"])[1];
     }
     function photoUrl(title) {
@@ -695,10 +600,7 @@
       const res = await fetchWithTimeout(`${apiUrl}${sep}store=${encodeURIComponent(store)}&q=${encodeURIComponent(query)}${zip ? "&zip=" + encodeURIComponent(zip) : ""}`, {}, 60000);
       if (!res.ok) throw new Error("Price service error " + res.status);
       const data = await res.json();
-      return (data.products || data || []).map(p => ({
-        name: p.name, price: p.price != null ? Number(p.price) : null, unitPrice: p.unitPrice != null ? Number(p.unitPrice) : null,
-        size: p.size || "", aisle: p.aisle || "", url: p.url || "", image: p.image || ""
-      }));
+      return (data.products || data || []).map(p => ({ name: p.name, price: p.price != null ? Number(p.price) : null, unitPrice: p.unitPrice != null ? Number(p.unitPrice) : null, size: p.size || "", aisle: p.aisle || "", url: p.url || "", image: p.image || "" }));
     }
     function storeSearchUrl(store, q) {
       const s = String(store || "").toLowerCase();
@@ -713,7 +615,7 @@
       try {
         const u = new URL(url);
         const seg = u.pathname.split("/").filter(Boolean);
-        const i = seg.findIndex(s => /product-detail|product|p$/i.test(s));
+        const i = seg.findIndex(s => /product-detail|product|^p$|^ip$/i.test(s));
         let slug = i >= 0 ? seg[i + 1] : seg.find(s => s.includes("-") && !/^\d+$/.test(s));
         if (!slug) return "";
         slug = decodeURIComponent(slug).replace(/^h-e-b-/i, "H-E-B ").replace(/^heb-/i, "H-E-B ");
@@ -722,9 +624,12 @@
     }
 
     // ===== Product page reader. These 3 functions are ALSO copied into the bookmark, =====
-    // ===== so they must stay self-contained (no outside variables, no line comments). =====
-    const BOOKMARK_VERSION = 3;
-    function productFromText(text, name) {
+    // ===== so they must stay self-contained (no outside variables, no line comments inside). =====
+    const BOOKMARK_VERSION = 4;
+    function productFromText(text, name, host) {
+      var H = String(host || "").toLowerCase();
+      var isWalmart = /walmart/.test(H);
+      var isKroger = /kroger|ralphs|fredmeyer|kingsoopers|smithsfoodanddrug|frysfood|qfc\.com|harristeeter|dillons|marianos|picknsave|food4less|citymarket|bakersplus|gerbes|jaycfoods|metromarket|payless/.test(H);
       var lines = String(text || "").split(/\n+/).map(function (l) { return l.replace(/\s+/g, " ").trim(); }).filter(Boolean);
       var nm = String(name || "").replace(/\s+/g, " ").trim().toLowerCase();
       var priceRe = /\$\s?\d{1,4}\.\d{2}/;
@@ -742,8 +647,7 @@
         }
       }
       if (start < 0) start = 0;
-      var after = lines.slice(start, start + 120);
-      var block = after.join("\n");
+      var block = lines.slice(start, start + 120).join("\n");
       var out = { anchor: start };
       var unit = block.match(/\$\s?(\d{1,4}\.\d{2})\s*\/\s*(lb|oz|fl oz|ct|each|kg|g|gal|qt|pt|count)\b/i);
       if (unit) out.unitPrice = "$" + unit[1] + "/" + unit[2].toLowerCase();
@@ -755,34 +659,65 @@
         var w = size[1].match(/([\d.]+)\s?lbs?/i);
         if (w) { out.price = Math.round(Number(unit[1]) * Number(w[1]) * 100) / 100; out.priceEstimated = true; }
       }
-      var STORE = "(?:H-?E-?B|HEB|Central Market|Joe V'?s|Mi Tienda|Kroger|Walmart|Target|Tom Thumb|Albertsons|Aldi|Market Street|Sprouts|Whole Foods)";
-      var bad = /\$|nearby|in-stock|in stock|add to|cart|list|sign up|log in|shop|curbside|delivery|pickup|prices may vary|more ways|^at$/i;
-      var order = [];
-      for (i = start; i < lines.length; i++) order.push(i);
-      for (i = 0; i < start; i++) order.push(i);
-      var sameLine = new RegExp("^(.{2,50}?)\\s+at\\s+(" + STORE + ".{0,30})$", "i");
-      var atLine = /^at\s+(.{2,40})$/i;
-      for (var k = 0; k < order.length && !out.aisle; k++) {
-        var n = order[k], L = lines[n], m;
-        if (/^in-store/i.test(L)) continue;
-        if ((m = L.match(sameLine)) && !bad.test(m[1])) { out.aisle = m[1].trim(); out.storeName = m[2].trim(); break; }
-        if ((m = L.match(atLine)) && n > 0 && !bad.test(lines[n - 1]) && lines[n - 1].length <= 50) { out.aisle = lines[n - 1]; out.storeName = m[1]; break; }
-        if (L.toLowerCase() === "at" && n > 0 && n + 1 < lines.length && !bad.test(lines[n - 1]) && lines[n - 1].length <= 50) { out.aisle = lines[n - 1]; out.storeName = lines[n + 1]; break; }
-      }
-      if (!out.aisle) {
-        var a = block.match(/(?:Located in|Find it in|Aisle location)\s*:?\s*([^\n]{2,40})/i) || block.match(/(?:^|\n)(Aisle\s+\d+[A-Za-z]?(?:\s*[-,]\s*[^\n]{0,30})?)/i);
-        if (a) out.aisle = a[1].trim();
+      var fmt = function (a) { a = String(a).replace(/\s+/g, " ").replace(/[\s|·•,;:-]+$/, "").trim(); return /^[A-Z]?\d{1,3}[A-Za-z]?$/.test(a) ? "Aisle " + a : a; };
+      var locatedIn = function () {
+        var m = String(text || "").match(/Located\s+in\s*:?\s*([^\n]{2,40})/i);
+        return m && !/\$|this store|stores near/i.test(m[1]) ? fmt(m[1]) : null;
+      };
+      var aisleLine = function () {
+        for (var q = 0; q < lines.length; q++) {
+          var L = lines[q];
+          if (/^aisle$/i.test(L) && q + 1 < lines.length && /^[A-Z]?\d{1,3}[A-Za-z]?$/.test(lines[q + 1])) return "Aisle " + lines[q + 1];
+          if (L.length <= 60 && !/aisles|shop by|by aisle/i.test(L)) {
+            var mm = L.match(/\bAisle\s*:?\s*([A-Z]?\d{1,3}[A-Za-z]?)\b/i);
+            if (mm) return "Aisle " + mm[1];
+          }
+        }
+        return null;
+      };
+      var atStore = function () {
+        var STORE = "(?:H-?E-?B|HEB|Central Market|Joe V'?s|Mi Tienda|Kroger|Walmart|Target|Tom Thumb|Albertsons|Aldi|Market Street|Sprouts|Whole Foods)";
+        var bad = /\$|nearby|in-stock|in stock|add to|cart|list|sign up|log in|shop|curbside|delivery|pickup|prices may vary|more ways|^at$/i;
+        var order = [], k, n, L, m;
+        for (k = start; k < lines.length; k++) order.push(k);
+        for (k = 0; k < start; k++) order.push(k);
+        var sameLine = new RegExp("^(.{2,50}?)\\s+at\\s+(" + STORE + ".{0,30})$", "i");
+        for (k = 0; k < order.length; k++) {
+          n = order[k]; L = lines[n];
+          if (/^in-store/i.test(L)) continue;
+          if ((m = L.match(sameLine)) && !bad.test(m[1])) return { aisle: m[1].trim(), storeName: m[2].trim() };
+          if ((m = L.match(/^at\s+(.{2,40})$/i)) && n > 0 && !bad.test(lines[n - 1]) && lines[n - 1].length <= 50) return { aisle: lines[n - 1], storeName: m[1] };
+          if (L.toLowerCase() === "at" && n > 0 && n + 1 < lines.length && !bad.test(lines[n - 1]) && lines[n - 1].length <= 50) return { aisle: lines[n - 1], storeName: lines[n + 1] };
+        }
+        return null;
+      };
+      var steps = isWalmart ? [aisleLine, locatedIn] : isKroger ? [locatedIn, aisleLine] : [locatedIn, atStore, aisleLine];
+      for (var s = 0; s < steps.length; s++) {
+        var r = steps[s]();
+        if (r) { if (typeof r === "string") out.aisle = r; else { out.aisle = r.aisle; out.storeName = r.storeName; } break; }
       }
       return out;
     }
-    function domAisle(doc) {
+    function domAisle(doc, host) {
+      var H = String(host || "").toLowerCase();
+      var noAt = /walmart|kroger|ralphs|fredmeyer|kingsoopers|frysfood|harristeeter|dillons/.test(H);
       var clean = function (t) { return String(t || "").replace(/\s+/g, " ").trim(); };
       var bad = /\$|nearby|in-stock|in stock|add to|cart|list|sign up|log in|shop|curbside|delivery|pickup/i;
       var els = doc.querySelectorAll("main *, body *");
-      for (var i = 0; i < els.length; i++) {
-        var el = els[i];
+      var i, el, t, m;
+      for (i = 0; i < els.length; i++) {
+        el = els[i];
         if (el.children.length > 3) continue;
-        var t = clean(el.textContent);
+        t = clean(el.textContent);
+        if (t.length > 45) continue;
+        if ((m = t.match(/^(?:Located\s+in\s*:?\s*)?Aisle\s*:?\s*([A-Z]?\d{1,3}[A-Za-z]?)$/i))) return { aisle: "Aisle " + m[1] };
+        if ((m = t.match(/^Located\s+in\s*:?\s*(.{2,40})$/i)) && !bad.test(m[1])) return { aisle: m[1] };
+      }
+      if (noAt) return null;
+      for (i = 0; i < els.length; i++) {
+        el = els[i];
+        if (el.children.length > 3) continue;
+        t = clean(el.textContent);
         if (!/^at\s+\S/i.test(t) || t.length > 45 || /^at\s+checkout/i.test(t)) continue;
         var p = el;
         for (var up = 0; up < 4 && p; up++) {
@@ -800,46 +735,46 @@
           }
         }
       }
-      var lab = doc.querySelectorAll("[aria-label*='isle' i], [aria-label*='location' i], [data-testid*='location' i], [data-testid*='aisle' i]");
-      for (var j = 0; j < lab.length; j++) {
-        var lt = clean(lab[j].getAttribute("aria-label") || lab[j].textContent);
-        var mm = lt.match(/(?:aisle|located in|location)\s*:?\s*(.{2,40})/i);
-        if (mm && !bad.test(mm[1])) return { aisle: mm[1].replace(/\s+at\s+.*$/i, "").trim() };
-      }
       return null;
     }
     function jsonAisle(doc) {
       var S = doc.querySelectorAll("script#__NEXT_DATA__, script[type='application/json']");
+      var exact = /^(aisle|aisles|aisleLocation|aisleLocations|productLocation|shelfLocation|inStoreLocation|storeLocation|location)$/i;
+      var norm = function (v) { v = String(v).trim(); return /^[A-Z]?\d{1,3}[A-Za-z]?$/.test(v) ? "Aisle " + v : v; };
+      var okStr = function (v) { return typeof v === "string" && v.length > 0 && v.length <= 40 && !/^https?:|^\{|true|false/i.test(v); };
       for (var i = 0; i < S.length; i++) {
         var found = null, data;
         try { data = JSON.parse(S[i].textContent); } catch (e) { continue; }
-        var walk = function (o, depth) {
+        var walk = function (o, depth, parentKey) {
           if (found || !o || typeof o !== "object" || depth > 40) return;
           for (var key in o) {
             if (found) return;
             var v = o[key];
-            if (/aisle|productLocation|shelfLocation|inStoreLocation/i.test(key)) {
-              if (typeof v === "string" && v.length > 1 && v.length <= 50) { found = v; return; }
-              if (v && typeof v === "object" && !Array.isArray(v)) {
-                var s = v.location || v.description || v.displayName || v.name || v.aisle || v.text;
-                if (typeof s === "string" && s.length > 1 && s.length <= 50) { found = s; return; }
-              }
-              if (Array.isArray(v) && v.length && v[0]) {
-                var s2 = typeof v[0] === "string" ? v[0] : (v[0].location || v[0].description || v[0].name);
-                if (typeof s2 === "string" && s2.length > 1 && s2.length <= 50) { found = s2; return; }
+            var aisleish = /aisle|productLocation|shelfLocation|inStoreLocation/i.test(key) || (/^location$/i.test(key) && /aisle|store/i.test(parentKey || ""));
+            if (aisleish) {
+              if (okStr(v)) { found = norm(v); return; }
+              if (typeof v === "number" && v > 0 && v < 1000) { found = "Aisle " + v; return; }
+              if (exact.test(key) && v && typeof v === "object") {
+                var first = Array.isArray(v) ? v[0] : v;
+                if (okStr(first)) { found = norm(first); return; }
+                if (first && typeof first === "object") {
+                  var s2 = first.description || first.location || first.displayName || first.name || first.aisle || first.number || first.text;
+                  if (okStr(s2) || typeof s2 === "number") { found = norm(s2); return; }
+                }
               }
             }
-            if (v && typeof v === "object") walk(v, depth + 1);
+            if (v && typeof v === "object") walk(v, depth + 1, key);
           }
         };
-        walk(data, 0);
+        walk(data, 0, "");
         if (found) return found;
       }
       return null;
     }
 
-    function parseProductPage(html) {
+    function parseProductPage(html, url) {
       const out = {};
+      let host = ""; try { host = new URL(url).hostname; } catch {}
       for (const b of html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
         try {
           const walk = (n) => {
@@ -857,18 +792,16 @@
         } catch {}
       }
       if (!out.name) { const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<meta[^>]+property=["']og:title["'][^>]*content=["']([^"']+)["']/i); if (m) out.name = decodeHtml(m[1]); }
-      Object.assign(out, productFromText(pageText(html), out.name));
+      Object.assign(out, productFromText(pageText(html), out.name, host));
       if (out.price == null && out.ldPrice != null) out.price = out.ldPrice;
       delete out.ldPrice; delete out.anchor;
-      if (!out.aisle) {
-        try { const a = jsonAisle(new DOMParser().parseFromString(html, "text/html")); if (a) out.aisle = a; } catch {}
-      }
+      if (!out.aisle) { try { const a = jsonAisle(new DOMParser().parseFromString(html, "text/html")); if (a) out.aisle = a; } catch {} }
       return out;
     }
 
-    // Runs ON the store's product page (inside the bookmark) and sends the details back to this app
     function bookmarkletMain(appUrl, version, productFromText, domAisle, jsonAisle) {
-      var d = { type: "fr-product", v: version, url: location.href };
+      var host = location.hostname;
+      var d = { type: "fr-product", v: version, url: location.href, host: host };
       var ldPrice = null, ldName = "";
       try {
         var S = document.querySelectorAll('script[type="application/ld+json"]');
@@ -885,40 +818,42 @@
       for (var h = 0; h < hs.length && !d.name; h++) { var ht = hs[h].innerText.replace(/\s+/g, " ").trim(); if (ht.length > 2 && !/^h-?e-?b$/i.test(ht)) d.name = ht; }
       if (!d.name) d.name = ldName || document.title.split("|")[0].trim();
       var text = document.body.innerText;
-      var r = productFromText(text, d.name);
+      var r = productFromText(text, d.name, host);
       for (var key in r) if (key !== "anchor") d[key] = r[key];
       if (d.price == null && ldPrice != null) d.price = ldPrice;
-      if (!d.aisle) { var da = domAisle(document); if (da) { d.aisle = da.aisle; if (da.storeName) d.storeName = da.storeName; } }
+      if (!d.aisle) { var da = domAisle(document, host); if (da) { d.aisle = da.aisle; if (da.storeName) d.storeName = da.storeName; } }
       if (!d.aisle) { var ja = jsonAisle(document); if (ja) d.aisle = ja; }
       if (!d.aisle) {
         var lines = text.split(/\n+/).map(function (l) { return l.replace(/\s+/g, " ").trim(); }).filter(Boolean);
         var a0 = r.anchor || 0;
-        var near = lines.slice(Math.max(0, a0 - 2), a0 + 35).join(" | ");
-        var ats = lines.filter(function (l) { return /(^|\s)at\s/i.test(l) && l.length < 60; }).slice(0, 8).join(" | ");
-        d.debug = ("NAME: " + d.name + " || NEAR: " + near + " || AT-LINES: " + ats).slice(0, 1500);
+        var near = lines.slice(Math.max(0, a0 - 2), a0 + 40).join(" | ");
+        var hits = lines.filter(function (l) { return /(^|\s)(at|aisle|located)\s/i.test(l) && l.length < 60; }).slice(0, 10).join(" | ");
+        d.debug = ("HOST: " + host + " || NAME: " + d.name + " || NEAR: " + near + " || HITS: " + hits).slice(0, 1600);
       }
       try { if (window.opener && !window.opener.closed) { window.opener.postMessage(d, "*"); window.close(); return; } } catch (e) {}
       location.href = appUrl + "#fr-product=" + encodeURIComponent(JSON.stringify(d));
     }
     function buildBookmarklet(appUrl) {
-      const code = "(" + bookmarkletMain.toString() + ")(" + JSON.stringify(appUrl) + "," + BOOKMARK_VERSION + "," +
-        productFromText.toString() + "," + domAisle.toString() + "," + jsonAisle.toString() + ");";
+      const code = "(" + bookmarkletMain.toString() + ")(" + JSON.stringify(appUrl) + "," + BOOKMARK_VERSION + "," + productFromText.toString() + "," + domAisle.toString() + "," + jsonAisle.toString() + ");";
       return "javascript:" + code.replace(/\s*\n\s*/g, " ");
     }
-    // ========== RECIPE COLLECTION IMPORT (Copy Me That, Paprika HTML, Recipe Keeper, any schema.org export) ==========
-    function loadJSZip() {
-      if (window.JSZip) return Promise.resolve(window.JSZip);
+    // ========== RECIPE COLLECTION IMPORT ==========
+    function loadScriptOnce(src) {
       return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) return resolve();
         const s = document.createElement("script");
-        s.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-        s.onload = () => resolve(window.JSZip);
-        s.onerror = () => reject(new Error("Couldn't load the zip reader - check your internet connection."));
+        s.src = src; s.onload = resolve; s.onerror = () => reject(new Error("Couldn't load " + src));
         document.head.appendChild(s);
       });
     }
+    async function loadJSZip() {
+      if (window.JSZip) return window.JSZip;
+      try { await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"); }
+      catch { throw new Error("Couldn't load the zip reader - check your internet connection."); }
+      return window.JSZip;
+    }
     const txt = (el) => (el ? (el.getAttribute && el.getAttribute("content")) || el.textContent || "" : "").replace(/\s+/g, " ").trim();
     const uniq = (arr) => [...new Set(arr.map(s => s.trim()).filter(Boolean))];
-
     function recipeFromElement(el) {
       const q = (sel) => el.querySelector(sel);
       const qa = (sel) => [...el.querySelectorAll(sel)];
@@ -946,9 +881,7 @@
         const h = heads.find(x => re.test(txt(x)) && txt(x).length < 40);
         if (!h) return [];
         let n = h.nextElementSibling;
-        for (let k = 0; n && k < 4; k++, n = n.nextElementSibling) {
-          if (/^(UL|OL)$/.test(n.tagName)) return [...n.querySelectorAll("li")].map(txt);
-        }
+        for (let k = 0; n && k < 4; k++, n = n.nextElementSibling) if (/^(UL|OL)$/.test(n.tagName)) return [...n.querySelectorAll("li")].map(txt);
         return [];
       };
       const title = txt(doc.querySelector("h1")) || txt(doc.querySelector("title"));
@@ -962,26 +895,15 @@
       let instructions = steps.length ? steps.map((s, i) => `${i + 1}. ${s}`).join("\n") : "Add instructions.";
       if (r.notes.length) instructions += "\n\nNotes: " + r.notes.join(" ");
       if (r.url) instructions += "\n\nSource: " + r.url;
-      return {
-        title: r.title, category: pickCategory(r.cats.join(" ")), dietTags: [],
-        baseServings: num0(r.yieldTxt) || 4,
-        nutrition: { calories: 400, protein: 25, carbs: 30, fat: 15, fiber: 5 },
-        ingredients: ings.length ? ings : [{ name: "Ingredient (edit)", amount: 1, unit: "", aisle: "Other" }],
-        instructions, image: null, url: r.url || "", rating: r.rating || 0
-      };
+      return { title: r.title, category: pickCategory(r.cats.join(" ")), dietTags: [], baseServings: num0(r.yieldTxt) || 4, nutrition: { calories: 400, protein: 25, carbs: 30, fat: 15, fiber: 5 }, ingredients: ings.length ? ings : [{ name: "Ingredient (edit)", amount: 1, unit: "", aisle: "Other" }], instructions, image: null, url: r.url || "", rating: r.rating || 0 };
     }
     function parseRecipeHtml(html) {
       const found = [];
       const seen = new Set();
-      const push = (recipe, imgSrc) => {
-        const k = recipe.title.toLowerCase();
-        if (seen.has(k)) return; seen.add(k);
-        found.push({ recipe, imgSrc });
-      };
+      const push = (recipe, imgSrc) => { const k = recipe.title.toLowerCase(); if (seen.has(k)) return; seen.add(k); found.push({ recipe, imgSrc }); };
       findJsonLdRecipes(html).forEach(r => { const rec = schemaToRecipe(r, ""); push({ ...rec, image: null }, pickImage(r.image)); });
       const doc = new DOMParser().parseFromString(html, "text/html");
-      const els = [...doc.querySelectorAll('[itemtype*="schema.org/Recipe"], .recipe, div[id^="recipe"], article.recipe')]
-        .filter((el, _, all) => !all.some(o => o !== el && o.contains(el) && o.matches('[itemtype*="schema.org/Recipe"], .recipe')));
+      const els = [...doc.querySelectorAll('[itemtype*="schema.org/Recipe"], .recipe, div[id^="recipe"], article.recipe')].filter((el, _, all) => !all.some(o => o !== el && o.contains(el) && o.matches('[itemtype*="schema.org/Recipe"], .recipe')));
       els.forEach(el => { const r = recipeFromElement(el); if (r && r.ingredients.length) push(rawToRecipe(r), r.img); });
       if (!found.length) { const r = recipeFromPlainPage(doc); if (r) push(rawToRecipe(r), r.img); }
       return found;
@@ -1047,20 +969,11 @@
       const m = (await r.json()).meals?.[0];
       if (!m) throw new Error("Recipe not found");
       const ings = [];
-      for (let i = 1; i <= 20; i++) {
-        const name = (m["strIngredient" + i] || "").trim();
-        if (name) ings.push(parseIngredientLine(`${(m["strMeasure" + i] || "").trim()} ${name}`.trim()));
-      }
+      for (let i = 1; i <= 20; i++) { const name = (m["strIngredient" + i] || "").trim(); if (name) ings.push(parseIngredientLine(`${(m["strMeasure" + i] || "").trim()} ${name}`.trim())); }
       const steps = String(m.strInstructions || "").split(/\r?\n+/).map(s => s.replace(/^\s*(step\s*)?\d+\s*[.):-]?\s*$/i, "").replace(/^\s*(step\s*)?\d+\s*[.):-]\s*/i, "").trim()).filter(s => s.length > 2);
       const src = m.strSource || `https://www.themealdb.com/meal/${id}`;
       const cat = { Breakfast: "Breakfast", Dessert: "Dessert", Starter: "Snack", Side: "Lunch" }[m.strCategory] || "Dinner";
-      return {
-        title: m.strMeal, category: cat, dietTags: m.strCategory === "Vegetarian" || m.strCategory === "Vegan" ? [m.strCategory] : [],
-        baseServings: 4, nutrition: { calories: 400, protein: 25, carbs: 30, fat: 15, fiber: 5 },
-        ingredients: ings.length ? ings : [{ name: "Ingredient (edit)", amount: 1, unit: "", aisle: "Other" }],
-        instructions: steps.map((s, i) => `${i + 1}. ${s}`).join("\n") + "\n\nSource: " + src,
-        image: m.strMealThumb, url: src
-      };
+      return { title: m.strMeal, category: cat, dietTags: m.strCategory === "Vegetarian" || m.strCategory === "Vegan" ? [m.strCategory] : [], baseServings: 4, nutrition: { calories: 400, protein: 25, carbs: 30, fat: 15, fiber: 5 }, ingredients: ings.length ? ings : [{ name: "Ingredient (edit)", amount: 1, unit: "", aisle: "Other" }], instructions: steps.map((s, i) => `${i + 1}. ${s}`).join("\n") + "\n\nSource: " + src, image: m.strMealThumb, url: src };
     }
     async function searchWebRecipes(query) {
       const html = await fetchPageHtml("https://html.duckduckgo.com/html/?q=" + encodeURIComponent(query + " recipe"));
@@ -1087,6 +1000,299 @@
       const cands = await findPhotoCandidates(r.title, { limit: 6 });
       const c = cands.find(c => c.score >= 0.5);
       return c ? c.thumb : null;
+    }
+    // ========== ACCOUNTS (Firebase Authentication + Cloud Firestore) ==========
+    const FB_SOURCES = ["https://www.gstatic.com/firebasejs/13.1.0/", "https://cdnjs.cloudflare.com/ajax/libs/firebase/13.0.0/"];
+    let fbPromise = null;
+    let signupInProgress = false;
+    function initFirebase() {
+      if (!FIREBASE_CONFIG) return Promise.reject(new Error("Accounts aren't set up in this copy of the app."));
+      if (fbPromise) return fbPromise;
+      fbPromise = (async () => {
+        let lastErr;
+        for (const base of FB_SOURCES) {
+          try {
+            await loadScriptOnce(base + "firebase-app-compat.js");
+            await loadScriptOnce(base + "firebase-auth-compat.js");
+            await loadScriptOnce(base + "firebase-firestore-compat.js");
+            lastErr = null; break;
+          } catch (e) { lastErr = e; }
+        }
+        if (lastErr || !window.firebase) throw new Error("Couldn't reach the sign-in service. Check your internet connection.");
+        const firebase = window.firebase;
+        const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+        const db = app.firestore();
+        try { db.settings({ ignoreUndefinedProperties: true, merge: true }); } catch {}
+        return { firebase, auth: app.auth(), db };
+      })();
+      fbPromise.catch(() => { fbPromise = null; });
+      return fbPromise;
+    }
+    const USERNAME_RE = /^[a-z0-9_.]{3,20}$/;
+    function friendlyAuthError(e) {
+      const c = e?.code || "";
+      const map = {
+        "auth/email-already-in-use": "There's already an account with that email. Try logging in instead.",
+        "auth/invalid-email": "That email address doesn't look right.",
+        "auth/weak-password": "Please choose a stronger password (at least 8 characters).",
+        "auth/wrong-password": "Wrong password. Try again or tap “Forgot password?”.",
+        "auth/invalid-credential": "Wrong username/email or password.",
+        "auth/invalid-login-credentials": "Wrong username/email or password.",
+        "auth/user-not-found": "No account found with that email.",
+        "auth/too-many-requests": "Too many tries. Please wait a few minutes and try again.",
+        "auth/network-request-failed": "Network problem - check your internet connection.",
+        "auth/operation-not-allowed": "Email sign-in isn't turned on yet (Firebase → Authentication → Sign-in method → Email/Password).",
+        "permission-denied": "The database blocked this. Make sure the security rules from SETUP.md are published."
+      };
+      return map[c] || e?.message || "Something went wrong. Please try again.";
+    }
+    async function emailForLogin(id) {
+      const v = String(id || "").trim();
+      if (v.includes("@")) return v;
+      const { db } = await initFirebase();
+      const snap = await db.collection("usernames").doc(v.toLowerCase()).get();
+      if (!snap.exists) throw new Error("No account with that username.");
+      return snap.data().email;
+    }
+    async function accountSignUp({ username, email, password }) {
+      const u = String(username || "").trim().toLowerCase();
+      if (!USERNAME_RE.test(u)) throw new Error("Usernames are 3-20 characters: letters, numbers, _ or .");
+      if (String(password || "").length < 8) throw new Error("Passwords need at least 8 characters.");
+      const { auth, db, firebase } = await initFirebase();
+      if ((await db.collection("usernames").doc(u).get()).exists) throw new Error("That username is taken. Please pick another.");
+      signupInProgress = true;
+      try {
+        const cred = await auth.createUserWithEmailAndPassword(String(email).trim(), password);
+        const uidNow = cred.user.uid;
+        try {
+          await db.runTransaction(async (tx) => {
+            const ref = db.collection("usernames").doc(u);
+            if ((await tx.get(ref)).exists) throw new Error("taken");
+            tx.set(ref, { uid: uidNow, email: String(email).trim().toLowerCase() });
+            tx.set(db.collection("users").doc(uidNow), { username: u, email: String(email).trim().toLowerCase(), plan: "trial", trialStarted: firebase.firestore.FieldValue.serverTimestamp(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          });
+        } catch (e) {
+          await cred.user.delete().catch(() => {});
+          throw e.message === "taken" ? new Error("That username was just taken. Please pick another.") : e;
+        }
+        return cred.user;
+      } finally { signupInProgress = false; }
+    }
+    async function accountLogIn({ id, password }) {
+      const { auth } = await initFirebase();
+      await auth.signInWithEmailAndPassword(await emailForLogin(id), password);
+    }
+    async function accountReset(id) {
+      const { auth } = await initFirebase();
+      await auth.sendPasswordResetEmail(await emailForLogin(id));
+    }
+    async function cloudLoad(uidNow) {
+      const { db } = await initFirebase();
+      const userRef = db.collection("users").doc(uidNow);
+      const [profileSnap, stateSnap, recipeSnap] = await Promise.all([userRef.get(), userRef.collection("data").doc("state").get(), userRef.collection("recipes").get()]);
+      const recipes = [];
+      recipeSnap.forEach(d => { try { recipes.push(JSON.parse(d.data().json)); } catch {} });
+      return { profile: profileSnap.exists ? profileSnap.data() : null, stateJson: stateSnap.exists ? stateSnap.data().json : "", recipes };
+    }
+    async function cloudWriteState(uidNow, json) {
+      const { db, firebase } = await initFirebase();
+      if (json.length > 950000) throw new Error("Your planner data is too large to save. Clear old weeks.");
+      await db.collection("users").doc(uidNow).collection("data").doc("state").set({ json, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    async function cloudWriteRecipes(uidNow, ops) {
+      const { db } = await initFirebase();
+      const col = db.collection("users").doc(uidNow).collection("recipes");
+      for (let i = 0; i < ops.length; i += 400) {
+        const batch = db.batch();
+        ops.slice(i, i + 400).forEach(op => op.del ? batch.delete(col.doc(op.id)) : batch.set(col.doc(op.id), { json: op.json }));
+        await batch.commit();
+      }
+    }
+
+    function AuthScreen({ configured, loadError, errorMessage, onLocal, onSignedUp, onRetry }) {
+      const [mode, setMode] = useState("welcome");
+      const [f, setF] = useState({ id: "", username: "", email: "", password: "", confirm: "" });
+      const [busy, setBusy] = useState(false);
+      const [err, setErr] = useState("");
+      const [msg, setMsg] = useState("");
+      const set = (k) => (e) => setF(x => ({ ...x, [k]: e.target.value }));
+      const go = (m) => { setMode(m); setErr(""); setMsg(""); };
+      const run = async (fn) => { setErr(""); setMsg(""); setBusy(true); try { await fn(); } catch (e) { setErr(friendlyAuthError(e)); } setBusy(false); };
+      const input = "w-full px-3.5 py-3 rounded-2xl border border-cocoa-200 bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-cocoa-200";
+      const primary = "w-full py-3 rounded-2xl bg-cocoa-600 text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-70";
+      const canAccounts = configured && !loadError;
+      return (
+        <div className="fixed inset-0 z-[100] bg-cream-50 overflow-y-auto">
+          <div className="min-h-full flex items-center justify-center p-5">
+            <div className="w-full max-w-sm">
+              <div className="text-center mb-7">
+                <div className="text-5xl mb-2">🍲</div>
+                <h1 className="font-display text-4xl font-semibold text-cocoa-800 leading-tight">Family <span className="italic font-normal text-cocoa-600">Recipe Planner</span></h1>
+                <p className="text-xs text-cocoa-500 tracking-[0.18em] uppercase mt-2">Meals · Grocery · Discover · Plan · Save</p>
+              </div>
+
+              {errorMessage && <p className="text-sm text-red-700 bg-red-50 rounded-2xl p-3 mb-4">{errorMessage} <button onClick={onRetry} className="underline font-medium">Try again</button></p>}
+
+              {mode === "welcome" && (
+                <div className="bg-white rounded-3xl border border-cocoa-100 shadow-sm p-5 space-y-3">
+                  <p className="text-center font-semibold text-lg text-cocoa-800">Do you have an account?</p>
+                  {canAccounts ? (
+                    <>
+                      <button onClick={() => go("login")} className={primary}>Yes, log in</button>
+                      <button onClick={() => go("signup")} className="w-full py-3 rounded-2xl border-2 border-cocoa-600 text-cocoa-700 font-semibold">No, try it free</button>
+                      <p className="text-[11px] text-center text-stone-500">Free trial, no limits while we're testing. Your recipes, plans and lists are saved to your account, so they're on your phone, tablet and computer.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-stone-600 bg-amber-50 rounded-2xl p-3">{loadError ? "Couldn't reach the sign-in service right now." : "Accounts aren't switched on in this copy of the app yet (see SETUP.md)."} You can still use the app; your data will stay on this device.</p>
+                      <button onClick={onLocal} className={primary}>Continue on this device</button>
+                      {loadError && <button onClick={onRetry} className="w-full py-2.5 rounded-2xl bg-stone-100 text-sm">Try connecting again</button>}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {mode === "login" && (
+                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-sm p-5 space-y-3" onSubmit={e => { e.preventDefault(); run(() => accountLogIn({ id: f.id, password: f.password })); }}>
+                  <p className="font-semibold text-lg text-cocoa-800">Log in</p>
+                  <input className={input} placeholder="Username or email" autoComplete="username" autoCapitalize="none" value={f.id} onChange={set("id")} required />
+                  <input className={input} type="password" placeholder="Password" autoComplete="current-password" value={f.password} onChange={set("password")} required />
+                  {err && <p className="text-sm text-red-600">{err}</p>}
+                  <button disabled={busy} className={primary}>{busy ? <><Spinner size={16} /> Logging in…</> : "Log in"}</button>
+                  <div className="flex justify-between text-sm">
+                    <button type="button" onClick={() => go("welcome")} className="text-stone-500">‹ Back</button>
+                    <button type="button" onClick={() => go("reset")} className="text-cocoa-600 underline">Forgot password?</button>
+                  </div>
+                </form>
+              )}
+
+              {mode === "signup" && (
+                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-sm p-5 space-y-3" onSubmit={e => {
+                  e.preventDefault();
+                  if (f.password !== f.confirm) { setErr("Passwords don't match."); return; }
+                  run(async () => { const user = await accountSignUp({ username: f.username, email: f.email, password: f.password }); onSignedUp(user); });
+                }}>
+                  <p className="font-semibold text-lg text-cocoa-800">Start your free trial</p>
+                  <div>
+                    <input className={input} placeholder="Username" autoComplete="username" autoCapitalize="none" value={f.username} onChange={e => setF(x => ({ ...x, username: e.target.value.toLowerCase().replace(/\s/g, "") }))} required />
+                    <p className="text-[11px] text-stone-500 mt-1 px-1">3-20 characters: letters, numbers, _ or .</p>
+                  </div>
+                  <input className={input} type="email" placeholder="Email" autoComplete="email" value={f.email} onChange={set("email")} required />
+                  <input className={input} type="password" placeholder="Password (8+ characters)" autoComplete="new-password" value={f.password} onChange={set("password")} required minLength={8} />
+                  <input className={input} type="password" placeholder="Confirm password" autoComplete="new-password" value={f.confirm} onChange={set("confirm")} required />
+                  {err && <p className="text-sm text-red-600">{err}</p>}
+                  <button disabled={busy} className={primary}>{busy ? <><Spinner size={16} /> Creating account…</> : "Create my account"}</button>
+                  <button type="button" onClick={() => go("welcome")} className="text-sm text-stone-500">‹ Back</button>
+                </form>
+              )}
+
+              {mode === "reset" && (
+                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-sm p-5 space-y-3" onSubmit={e => { e.preventDefault(); run(async () => { await accountReset(f.id); setMsg("Check your email for a link to reset your password."); }); }}>
+                  <p className="font-semibold text-lg text-cocoa-800">Reset your password</p>
+                  <input className={input} placeholder="Username or email" autoCapitalize="none" value={f.id} onChange={set("id")} required />
+                  {err && <p className="text-sm text-red-600">{err}</p>}
+                  {msg && <p className="text-sm text-emerald-700">{msg}</p>}
+                  <button disabled={busy} className={primary}>{busy ? <Spinner size={16} /> : "Send reset email"}</button>
+                  <button type="button" onClick={() => go("login")} className="text-sm text-stone-500">‹ Back to log in</button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function OnboardingModal({ prefs, setPrefs, onGoToPrefs }) {
+      const [step, setStep] = useState(1);
+      const [name, setName] = useState(prefs.familyName || "");
+      const clean = name.trim().replace(/\s+family$/i, "");
+      const finish = (toPrefs) => { setPrefs(p => ({ ...p, onboarded: true })); if (toPrefs) onGoToPrefs(); };
+      return (
+        <div className="fixed inset-0 z-[95] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-cream-50 rounded-3xl p-6 max-w-sm w-full shadow-xl">
+            {step === 1 ? (
+              <form onSubmit={e => { e.preventDefault(); setPrefs(p => ({ ...p, familyName: clean })); setStep(2); }} className="space-y-4">
+                <p className="font-display text-2xl font-semibold text-cocoa-800">Let's make it yours</p>
+                <label className="block text-sm text-stone-700">What's your family name?
+                  <input autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Smith" className="mt-1.5 w-full px-3.5 py-3 rounded-2xl border border-cocoa-200 bg-white text-[15px]" />
+                </label>
+                <div className="rounded-2xl bg-cocoa-100/70 px-4 py-3">
+                  <p className="text-[11px] text-cocoa-500 mb-1">Your app header will read:</p>
+                  <p className="font-display text-xl font-semibold text-cocoa-800 leading-tight">{clean || "Your"} <span className="font-normal italic text-cocoa-600">Family</span> Recipe Planner</p>
+                </div>
+                <button disabled={!clean} className="w-full py-3 rounded-2xl bg-cocoa-600 text-white font-semibold disabled:opacity-50">Continue</button>
+                <button type="button" onClick={() => setStep(2)} className="w-full text-sm text-stone-500">Skip for now</button>
+              </form>
+            ) : (
+              <div className="space-y-4 text-center">
+                <div className="text-5xl">🎉</div>
+                <p className="font-display text-2xl font-semibold text-cocoa-800">{prefs.familyName ? `Welcome, ${prefs.familyName} family!` : "Welcome!"}</p>
+                <p className="text-sm text-stone-600">Head to the <b>Preferences</b> page to customize your app further: family size, diet and allergies, your grocery stores, weekly budget, and AI keys.</p>
+                <button onClick={() => finish(true)} className="w-full py-3 rounded-2xl bg-cocoa-600 text-white font-semibold">Go to Preferences</button>
+                <button onClick={() => finish(false)} className="w-full py-2.5 rounded-2xl bg-white border text-sm">I'll explore first</button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Browsers don't let a website add bookmarks itself, so this walks people through it for their device.
+    function BookmarkHelper({ code, copied, onCopy, onClose, onDone }) {
+      const ua = navigator.userAgent || "";
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/i.test(ua);
+      const isMac = /Mac/i.test(navigator.platform || ua);
+      const [platform, setPlatform] = useState(isIOS ? "ios" : isAndroid ? "android" : "desktop");
+      const tabs = [["desktop", "Computer"], ["ios", "iPhone / iPad"], ["android", "Android"]];
+      const Step = ({ n, children }) => (<li className="flex gap-2.5"><span className="w-6 h-6 rounded-full bg-cocoa-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">{n}</span><span className="text-sm text-stone-700">{children}</span></li>);
+      const CopyBtn = () => (<button onClick={onCopy} className={`w-full py-2.5 rounded-xl text-sm font-semibold ${copied ? "bg-emerald-100 text-emerald-800" : "bg-cocoa-600 text-white"}`}>{copied ? "✓ Code copied" : "📋 Copy the button code"}</button>);
+      return (
+        <div className="fixed inset-0 z-[96] bg-black/50 flex items-end sm:items-center justify-center">
+          <div className="bg-cream-50 w-full max-w-md max-h-[92vh] overflow-y-auto rounded-t-[2rem] sm:rounded-[2rem] p-5 space-y-4">
+            <div className="flex justify-between items-start gap-2">
+              <div>
+                <p className="font-display text-2xl font-semibold text-cocoa-800">Add “Send to Recipe App”</p>
+                <p className="text-xs text-stone-600 mt-1">Browsers don't let websites add bookmarks for you, so here's the quickest way for your device (about 30 seconds, one time only).</p>
+              </div>
+              <button onClick={onClose} className="text-xl">✕</button>
+            </div>
+            <div className="flex gap-1.5">
+              {tabs.map(([id, label]) => <button key={id} onClick={() => setPlatform(id)} className={`flex-1 py-1.5 rounded-full text-xs border ${platform === id ? "bg-cocoa-600 text-white border-cocoa-600" : "bg-white"}`}>{label}</button>)}
+            </div>
+            {platform === "desktop" && (
+              <ol className="space-y-3">
+                <Step n="1">Show your bookmarks bar: press <b>{isMac ? "⌘ + Shift + B" : "Ctrl + Shift + B"}</b>.</Step>
+                <Step n="2">Drag this button up onto the bookmarks bar:
+                  <div className="mt-2 text-center">
+                    <a ref={el => el && el.setAttribute("href", code)} onClick={e => { e.preventDefault(); alert("Drag the button onto your bookmarks bar (don't click it here)."); }}
+                      className="inline-block px-4 py-2.5 rounded-xl bg-cocoa-600 text-white font-semibold shadow cursor-grab">⭐ Send to Recipe App</a>
+                  </div>
+                </Step>
+                <Step n="3">On a store's product page, click <b>Send to Recipe App</b> in your bookmarks bar.</Step>
+              </ol>
+            )}
+            {platform === "ios" && (
+              <ol className="space-y-3">
+                <Step n="1"><CopyBtn /></Step>
+                <Step n="2">In Safari, tap <b>Share</b> (□↑) → <b>Add Bookmark</b> → change the name to <b>Send to Recipe App</b> → <b>Save</b>.</Step>
+                <Step n="3">Tap the <b>Bookmarks</b> icon (📖) → <b>Edit</b> → tap <b>Send to Recipe App</b> → clear the address and <b>paste</b> → <b>Done</b>.</Step>
+                <Step n="4">On a store's product page, open <b>Bookmarks</b> and tap <b>Send to Recipe App</b>.</Step>
+              </ol>
+            )}
+            {platform === "android" && (
+              <ol className="space-y-3">
+                <Step n="1"><CopyBtn /></Step>
+                <Step n="2">In Chrome, tap <b>⋮</b> → <b>☆</b> to bookmark this page, then tap <b>Edit</b> on the pop-up.</Step>
+                <Step n="3">Change the name to <b>Send to Recipe App</b>, clear the URL and <b>paste</b>, then tap ←.</Step>
+                <Step n="4">On a store's product page, tap the address bar, type <b>Send to Recipe</b>, and tap the bookmark that appears.</Step>
+              </ol>
+            )}
+            <p className="text-[11px] text-stone-500">Works on H-E-B, Kroger and Walmart product pages. Pick your store on their site first so the aisle shows.</p>
+            <button onClick={onDone} className="w-full py-3 rounded-2xl bg-emerald-600 text-white font-semibold">I've added it ✓</button>
+          </div>
+        </div>
+      );
     }
 
     // ========== ADD RECIPE MODAL (proper component) ==========
@@ -1258,8 +1464,6 @@
       const planner = weeks[currentWeekKey] || emptyWeek();
 
       useEffect(() => { safeSave("fr_recipes_v3", recipes); }, [recipes]);
-
-      // Background: find a real photo for any recipe without one (one at a time)
       useEffect(() => {
         if (photoBusy.current || (typeof navigator !== "undefined" && navigator.onLine === false)) return;
         const target = recipes.find(r => !r.image && (r.imgScan || 0) < PHOTO_SCAN_VERSION);
@@ -1270,18 +1474,13 @@
           .then(url => setRecipes(prev => prev.map(x => x.id === target.id ? { ...x, image: x.image || url || null, imgScan: PHOTO_SCAN_VERSION, imageAuto: !!url } : x)))
           .finally(() => { photoBusy.current = false; });
       }, [recipes]);
-
-      useEffect(() => {
-        if (prefs.weeklyBudget == null) { const b = localStorage.getItem("fr_budget"); if (b) setPrefs(p => ({ ...p, weeklyBudget: b })); }
-      }, []);
-
+      useEffect(() => { if (prefs.weeklyBudget == null) { const b = localStorage.getItem("fr_budget"); if (b) setPrefs(p => ({ ...p, weeklyBudget: b })); } }, []);
       useEffect(() => {
         if (!aiLoading) return;
         setAiElapsed(0);
         const t = setInterval(() => setAiElapsed(s => s + 1), 1000);
         return () => clearInterval(t);
       }, [aiLoading]);
-
       useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 4000); return () => clearTimeout(t); }, [toast]);
       useEffect(() => { safeSave("fr_prefs_v3", prefs); }, [prefs]);
       useEffect(() => { safeSave("fr_weeks_v3", weeks); }, [weeks]);
@@ -1460,7 +1659,7 @@
           getScaledIngredients(r, mult).forEach(ing => {
             const nameKey = ing.name.trim().toLowerCase();
             const unitKey = (ing.unit || "").trim().toLowerCase().replace(/s$/, "");
-            const key = `${nameKey}|${unitKey}`; // don't add "1 lb" + "2 cups" together
+            const key = `${nameKey}|${unitKey}`;
             if (groceryRemoved.includes(`${currentWeekKey}|${key}`)) return;
             if (!map[key]) map[key] = { name: ing.name, amount: 0, unit: ing.unit, aisle: ing.aisle || "Other", key, nameKey };
             map[key].amount += ing.amount;
@@ -1502,7 +1701,7 @@
       }, []);
 
       const addRecipe = useCallback((recipe) => {
-        const newR = { ...recipe, id: uid(), favorite: false, rating: 0, timesUsed: 0 };
+        const newR = { ...recipe, id: uid(), favorite: false, rating: 0, timesUsed: 0, _ts: Date.now() };
         setRecipes(prev => [newR, ...prev]);
         setShowAdd(false);
         setImportPreview(null);
@@ -1526,9 +1725,7 @@
           const text = pageText(html).slice(0, 15000);
           if (key && text.length > 300) {
             try {
-              const rec = await callGeminiRecipe(key,
-                `Extract the recipe from this web page text. Keep the original ingredients, amounts and steps; do not invent a different recipe. If nutrition isn't given, estimate it. Page text:\n\n${text}`,
-                { mode: prefs.aiMode || "fast", onProgress: (p) => setImportStatus(describeAiProgress(p)) });
+              const rec = await callGeminiRecipe(key, `Extract the recipe from this web page text. Keep the original ingredients, amounts and steps; do not invent a different recipe. If nutrition isn't given, estimate it. Page text:\n\n${text}`, { mode: prefs.aiMode || "fast", onProgress: (p) => setImportStatus(describeAiProgress(p)) });
               setImportPreview({ ...rec, image: metaImage(html, url), url, instructions: rec.instructions + "\n\nSource: " + url });
               return;
             } catch (e) { setImportStatus("AI couldn't read it (" + e.message + ") - using basic import…"); }
@@ -1537,10 +1734,7 @@
           const title = titleMatch ? decodeHtml(titleMatch[1]).replace(/\s[|–-]\s.*$/, "").trim() : "Imported Recipe";
           let ingredients = [];
           const ingSection = html.match(/ingredients?[^<]*<\/h[2-4]>([\s\S]*?)(?:instructions?|directions?|method|steps|preparation)/i);
-          if (ingSection) {
-            ingredients = [...ingSection[1].matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)].slice(0, 30)
-              .map(m => decodeHtml(m[1])).filter(t => t.length > 2 && t.length < 120).map(parseIngredientLine);
-          }
+          if (ingSection) ingredients = [...ingSection[1].matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)].slice(0, 30).map(m => decodeHtml(m[1])).filter(t => t.length > 2 && t.length < 120).map(parseIngredientLine);
           let instructions = "Please paste or edit the full instructions here.\n\nSource: " + url;
           const instMatch = html.match(/(?:instructions?|directions?|method|steps)[^<]*<\/h[2-4]>([\s\S]{50,4000}?)<\/(?:ol|section)/i);
           if (instMatch) {
@@ -1553,10 +1747,7 @@
         } catch (e) {
           alert("Couldn't load that page (" + e.message + "). Some sites block apps from reading them. You can still fill in the form by hand.");
           setImportPreview(blank);
-        } finally {
-          setImportLoading(false);
-          setImportStatus("");
-        }
+        } finally { setImportLoading(false); setImportStatus(""); }
       };
 
       const handlePhotoUpload = (e) => {
@@ -1611,10 +1802,7 @@
       const generateAiRecipe = async () => {
         setAiError("");
         const key = (prefs.geminiApiKey || "").trim();
-        if (!key) {
-          setAiError("AI Chef needs a Gemini API key. Add one in Prefs (free at aistudio.google.com).");
-          return;
-        }
+        if (!key) { setAiError("AI Chef needs a Gemini API key. Add one in Prefs (free at aistudio.google.com)."); return; }
         const ctrl = new AbortController();
         aiAbort.current = ctrl;
         setAiProgress(null);
@@ -1646,10 +1834,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
           setShowAdd(true);
         } catch (e) {
           if (!ctrl.signal.aborted) setAiError(e.message || "Something went wrong. Please try again.");
-        } finally {
-          setAiLoading(false);
-          aiAbort.current = null;
-        }
+        } finally { setAiLoading(false); aiAbort.current = null; }
       };
 
       const runWebSearch = async () => {
@@ -1678,13 +1863,9 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
       const importWebResult = async (res) => {
         if (res.kind === "mealdb") {
           setWebImportingId(res.id);
-          try { setImportPreview(await mealDbToRecipe(res.id)); setShowAdd(true); }
-          catch (e) { alert("Couldn't load that recipe: " + e.message); }
+          try { setImportPreview(await mealDbToRecipe(res.id)); setShowAdd(true); } catch (e) { alert("Couldn't load that recipe: " + e.message); }
           setWebImportingId(null);
-        } else {
-          setShowAdd(true);
-          tryImportUrl(res.url);
-        }
+        } else { setShowAdd(true); tryImportUrl(res.url); }
       };
 
       const handleCollectionFile = async (e) => {
@@ -1700,16 +1881,126 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
           if (!fresh.length) { setBulkStatus(""); alert(`All ${list.length} recipes are already in your book.`); return; }
           const photoBytes = fresh.reduce((n, r) => n + (r.image && r.image.startsWith("data:") ? r.image.length : 0), 0);
           let note = "";
-          if (photoBytes > 2500000) { list = fresh.map(r => r.image && r.image.startsWith("data:") ? { ...r, image: null } : r); note = "\n\nYour export's photos are too large to store on this device, so the app will find photos online instead."; }
+          if (photoBytes > 2500000) { list = fresh.map(r => r.image && r.image.startsWith("data:") ? { ...r, image: null } : r); note = "\n\nYour export's photos are too large to store, so the app will find photos online instead."; }
           else list = fresh;
           if (!confirm(`Import ${list.length} recipe${list.length === 1 ? "" : "s"}?${dupes ? ` (${dupes} already in your book will be skipped)` : ""}${note}`)) { setBulkStatus(""); return; }
-          setRecipes(prev => [...list.map(r => ({ ...r, id: uid(), favorite: false, rating: r.rating || 0, timesUsed: 0, imgScan: 0 })), ...prev]);
+          const now = Date.now();
+          setRecipes(prev => [...list.map((r, k) => ({ ...r, id: uid(), favorite: false, rating: r.rating || 0, timesUsed: 0, imgScan: 0, _ts: now - k })), ...prev]);
           setBulkStatus("");
           setToast(`Imported ${list.length} recipes ✓`);
-        } catch (err) {
-          setBulkStatus("");
-          alert("Import failed: " + err.message);
+        } catch (err) { setBulkStatus(""); alert("Import failed: " + err.message); }
+      };
+
+      // ===== ACCOUNTS + CLOUD SYNC =====
+      const [account, setAccount] = useState({ status: "loading" });
+      const [syncStatus, setSyncStatus] = useState("");
+      const [bookmarkHelpOpen, setBookmarkHelpOpen] = useState(false);
+      const [bookmarkCopied, setBookmarkCopied] = useState(false);
+      const appReady = account.status === "in" || account.status === "local";
+      const accountRef = useRef(account); accountRef.current = account;
+      const syncReady = useRef(false);
+      const handledUid = useRef(null);
+      const lastStateJson = useRef("");
+      const lastRecipes = useRef(new Map());
+      const pendingProduct = useRef(null);
+      const latest = useRef({});
+      latest.current = { recipes, prefs, weeks, groceryChecked, groceryRemoved, favDismissed };
+      const stateSnapshot = (v) => JSON.stringify({ prefs: v.prefs, weeks: v.weeks, groceryChecked: v.groceryChecked, groceryRemoved: v.groceryRemoved, favDismissed: v.favDismissed });
+
+      const pushRecipes = async () => {
+        const a = accountRef.current;
+        if (!syncReady.current || a.status !== "in") return;
+        const next = new Map(latest.current.recipes.map(r => [r.id, JSON.stringify(r)]));
+        const ops = [];
+        next.forEach((json, id) => { if (lastRecipes.current.get(id) !== json) ops.push({ id, json }); });
+        lastRecipes.current.forEach((_, id) => { if (!next.has(id)) ops.push({ id, del: true }); });
+        if (!ops.length) return;
+        setSyncStatus("saving");
+        try { await cloudWriteRecipes(a.uid, ops); lastRecipes.current = next; setSyncStatus("saved"); }
+        catch (e) { setSyncStatus("error"); }
+      };
+      const pushState = async () => {
+        const a = accountRef.current;
+        if (!syncReady.current || a.status !== "in") return;
+        const json = stateSnapshot(latest.current);
+        if (json === lastStateJson.current) return;
+        setSyncStatus("saving");
+        try { await cloudWriteState(a.uid, json); lastStateJson.current = json; setSyncStatus("saved"); }
+        catch (e) { setSyncStatus("error"); }
+      };
+      useEffect(() => { if (account.status !== "in") return; const t = setTimeout(pushRecipes, 1200); return () => clearTimeout(t); }, [recipes, account.status]);
+      useEffect(() => { if (account.status !== "in") return; const t = setTimeout(pushState, 1500); return () => clearTimeout(t); }, [prefs, weeks, groceryChecked, groceryRemoved, favDismissed, account.status]);
+      // Retry failed saves when the connection comes back
+      useEffect(() => { const on = () => { pushRecipes(); pushState(); }; window.addEventListener("online", on); return () => window.removeEventListener("online", on); }, []);
+      // Give every recipe a stable sort time (keeps the same order on every device)
+      useEffect(() => {
+        if (recipes.some(r => !r._ts)) { const now = Date.now(); setRecipes(prev => prev.map((r, i) => r._ts ? r : { ...r, _ts: now - i * 1000 })); }
+      }, [recipes]);
+
+      const handleSignedIn = async (user, { isNew = false } = {}) => {
+        if (handledUid.current === user.uid) return;
+        handledUid.current = user.uid;
+        syncReady.current = false;
+        setAccount({ status: "syncing" });
+        try {
+          const { profile, stateJson, recipes: cloudRecipes } = await cloudLoad(user.uid);
+          const empty = !stateJson && cloudRecipes.length === 0;
+          if (empty) {
+            lastStateJson.current = "";
+            lastRecipes.current = new Map();
+            if (isNew) setPrefs(p => ({ ...p, onboarded: false }));
+          } else {
+            const st = stateJson ? JSON.parse(stateJson) : {};
+            const sorted = cloudRecipes.sort((a, b) => (b._ts || 0) - (a._ts || 0));
+            setRecipes(sorted);
+            if (st.prefs) setPrefs({ ...defaultPrefs, ...st.prefs });
+            if (st.weeks) setWeeks(st.weeks);
+            setGroceryChecked(st.groceryChecked || {});
+            setGroceryRemoved(st.groceryRemoved || []);
+            setFavDismissed(st.favDismissed || []);
+            lastStateJson.current = stateJson || "";
+            lastRecipes.current = new Map(sorted.map(r => [r.id, JSON.stringify(r)]));
+          }
+          localStorage.removeItem("fr_mode");
+          setAccount({ status: "in", uid: user.uid, email: user.email, username: profile?.username || String(user.email || "").split("@")[0] });
+          syncReady.current = true;
+          setSyncStatus(empty ? "saving" : "saved");
+        } catch (e) {
+          handledUid.current = null;
+          setAccount({ status: "error", message: "Couldn't load your account: " + friendlyAuthError(e) });
         }
+      };
+      useEffect(() => {
+        if (location.hash.startsWith("#fr-product=")) {
+          try { pendingProduct.current = JSON.parse(decodeURIComponent(location.hash.slice(12))); } catch {}
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+        if (!FIREBASE_CONFIG || localStorage.getItem("fr_mode") === "local") {
+          setAccount({ status: localStorage.getItem("fr_mode") === "local" ? "local" : "out" });
+          return;
+        }
+        let unsub = null;
+        initFirebase().then(fb => {
+          unsub = fb.auth.onAuthStateChanged(user => {
+            if (signupInProgress) return;
+            if (user) handleSignedIn(user);
+            else { handledUid.current = null; syncReady.current = false; setAccount({ status: "out" }); }
+          });
+        }).catch(() => setAccount({ status: "out", loadError: true }));
+        return () => unsub && unsub();
+      }, []);
+      const logOut = async () => {
+        if (!confirm("Log out? Everything stays saved in your account.")) return;
+        await Promise.allSettled([pushRecipes(), pushState()]);
+        syncReady.current = false;
+        try { await (await initFirebase()).auth.signOut(); } catch {}
+        ["fr_recipes_v3", "fr_prefs_v3", "fr_weeks_v3", "fr_gcheck", "fr_grem", "fr_fav_dismissed", "fr_pending_pick", "fr_budget", "fr_mode"].forEach(k => localStorage.removeItem(k));
+        location.reload();
+      };
+      const openBookmarkHelper = () => {
+        setBookmarkCopied(false);
+        if (navigator.clipboard) navigator.clipboard.writeText(bookmarkletCode).then(() => setBookmarkCopied(true), () => {});
+        setBookmarkHelpOpen(true);
       };
 
       // ---- Store prices: items live with the store whose price you saved ----
@@ -1736,7 +2027,6 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
       const pricedItems = Object.values(groceryByStore).flatMap(a => Object.values(a).flat()).filter(it => it.place.match?.price != null);
       const groceryTotal = pricedItems.reduce((sum, it) => sum + it.place.match.price, 0);
       const weeklyBudget = Number(String(prefs.weeklyBudget ?? "").replace(/[^0-9.]/g, "")) || 0;
-
       const saveStoreMatch = (store, nameKey, match) => {
         setPrefs(p => {
           const all = p.storeMatches || {};
@@ -1759,9 +2049,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
         try {
           const products = await searchStorePrices(api, store, item.name, prefs.storeZip);
           setPriceSheet(ps => ps && ps.item.key === item.key && ps.store === store ? { ...ps, loading: false, results: recommendProduct(item.name, products).slice(0, 8) } : ps);
-        } catch (e) {
-          setPriceSheet(ps => ps && ps.item.key === item.key && ps.store === store ? { ...ps, loading: false, error: e.message } : ps);
-        }
+        } catch (e) { setPriceSheet(ps => ps && ps.item.key === item.key && ps.store === store ? { ...ps, loading: false, error: e.message } : ps); }
       };
       const applyProduct = (d, { fromLink = false } = {}) => {
         let target = pendingPick.current;
@@ -1769,8 +2057,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
         if (!target || !d) return;
         const store = target.store || currentStore;
         const outdated = d.type === "fr-product" && !fromLink && (!d.v || d.v < BOOKMARK_VERSION);
-        const match = { name: (d.name || "").trim() || target.name, price: d.price != null && d.price !== "" && !isNaN(d.price) ? Number(d.price) : null,
-          aisle: (d.aisle || "").trim(), size: d.size || "", unitPrice: d.unitPrice || "", estimated: !!d.priceEstimated, url: d.url || "" };
+        const match = { name: (d.name || "").trim() || target.name, price: d.price != null && d.price !== "" && !isNaN(d.price) ? Number(d.price) : null, aisle: (d.aisle || "").trim(), size: d.size || "", unitPrice: d.unitPrice || "", estimated: !!d.priceEstimated, url: d.url || "" };
         if (match.price != null && match.aisle) {
           saveStoreMatch(store, target.nameKey, match);
           setPriceSheet(null);
@@ -1782,11 +2069,10 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
           const missing = [match.price == null && "price", !match.aisle && "aisle"].filter(Boolean).join(" and ");
           setPriceSheet(ps => ({
             ...(ps || { item, store, results: [], loading: false, error: "", linkInput: "" }),
-            linkBusy: false,
-            debug: d.debug || "",
+            linkBusy: false, debug: d.debug || "",
             manual: { name: match.name, price: match.price ?? "", aisle: match.aisle, url: match.url, size: match.size, unitPrice: match.unitPrice },
             linkMsg: outdated
-              ? `Your “Send to Recipe App” bookmark is an older version, which can't read the aisle. Go to Prefs → Store prices, re-create the bookmark, then tap it on the product page again. For now, type the ${missing} below.`
+              ? `Your “Send to Recipe App” bookmark is an older version. Tap “Update the Send to Recipe App button” below, then try again. For now, type the ${missing} below.`
               : `Got the product${match.price != null ? " and price" : ""}. ${fromLink ? "The store doesn't let apps read the rest of its page, so " : "Couldn't spot the " + missing + " on that page, so "}fill in the ${missing} below and tap Save.${d.debug ? " (See “What the bookmark saw” below.)" : ""}`
           }));
         }
@@ -1796,7 +2082,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
         if (!url) { setPriceSheet(ps => ({ ...ps, linkMsg: "That doesn't look like a link. Copy the product page's address and try again." })); return; }
         setPriceSheet(ps => ({ ...ps, linkBusy: true, linkMsg: "Reading the product page…" }));
         const d = { url, name: productNameFromUrl(url) };
-        try { Object.assign(d, Object.fromEntries(Object.entries(parseProductPage(await fetchPageHtml(url))).filter(([, v]) => v != null && v !== ""))); } catch {}
+        try { Object.assign(d, Object.fromEntries(Object.entries(parseProductPage(await fetchPageHtml(url), url)).filter(([, v]) => v != null && v !== ""))); } catch {}
         applyProduct(d, { fromLink: true });
       };
       const pasteProductLink = async () => {
@@ -1806,12 +2092,10 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
       useEffect(() => {
         const onMsg = (e) => { if (e.data && e.data.type === "fr-product") applyProduct(e.data); };
         window.addEventListener("message", onMsg);
-        if (location.hash.startsWith("#fr-product=")) {
-          try { applyProduct(JSON.parse(decodeURIComponent(location.hash.slice(12)))); } catch {}
-          history.replaceState(null, "", location.pathname + location.search);
-        }
         return () => window.removeEventListener("message", onMsg);
       }, []);
+      // Product sent back by the bookmark via the address bar: apply once the account has loaded
+      useEffect(() => { if (appReady && pendingProduct.current) { const d = pendingProduct.current; pendingProduct.current = null; applyProduct(d); } }, [appReady]);
       const appUrl = location.href.split("#")[0];
       const bookmarkletCode = useMemo(() => buildBookmarklet(appUrl), [appUrl]);
       const priceWholeList = async () => {
@@ -1841,8 +2125,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
       const searchPhotos = async (q) => {
         const query = (q || photoSearchQuery || "").trim();
         if (!query) return;
-        setPhotoLoading(true);
-        setPhotoResults([]);
+        setPhotoLoading(true); setPhotoResults([]);
         const src = typeof photoTarget === "string" ? (recipes.find(r => r.id === photoTarget)?.url || "") : photoTarget === "edit" ? (editForm?.url || "") : (importPreview?.url || "");
         try {
           const cands = await findPhotoCandidates(query, { unsplashKey: (prefs.unsplashAccessKey || "").trim(), sourceUrl: src, limit: 18 });
@@ -2092,12 +2375,10 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                     </select>
                   </label>
                 </div>
-
                 <div className="flex gap-2">
                   <input value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Add custom store..." className="flex-1 text-sm px-3 py-1.5 rounded-lg border" />
                   <button onClick={addCustomStore} className="px-3 py-1.5 bg-stone-800 text-white text-sm rounded-lg">Add</button>
                 </div>
-
                 {groceryItemsAll.length === 0 ? (
                   <p className="text-center text-stone-400 py-12">No items yet. Add recipes in the Planner.</p>
                 ) : (
@@ -2123,15 +2404,10 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                             <div>
                               <p className="text-[11px] text-stone-500">Weekly budget</p>
                               <div className="flex items-center justify-center font-semibold text-lg">$
-                                <input inputMode="decimal" value={prefs.weeklyBudget ?? ""} placeholder="0"
-                                  onChange={e => setPrefs(p => ({ ...p, weeklyBudget: e.target.value.replace(/[^0-9.]/g, "") }))}
-                                  className="w-16 bg-transparent text-center border-b border-dashed border-cocoa-300 focus:outline-none" />
+                                <input inputMode="decimal" value={prefs.weeklyBudget ?? ""} placeholder="0" onChange={e => setPrefs(p => ({ ...p, weeklyBudget: e.target.value.replace(/[^0-9.]/g, "") }))} className="w-16 bg-transparent text-center border-b border-dashed border-cocoa-300 focus:outline-none" />
                               </div>
                             </div>
-                            <div>
-                              <p className="text-[11px] text-stone-500">Groceries</p>
-                              <p className="font-semibold text-lg">${groceryTotal.toFixed(2)}</p>
-                            </div>
+                            <div><p className="text-[11px] text-stone-500">Groceries</p><p className="font-semibold text-lg">${groceryTotal.toFixed(2)}</p></div>
                             <div>
                               <p className="text-[11px] text-stone-500">{!weeklyBudget ? "Left" : over ? "Over by" : "Saving"}</p>
                               <p className={`font-semibold text-lg ${!weeklyBudget ? "text-stone-400" : over ? "text-red-600" : "text-emerald-700"}`}>{weeklyBudget ? money(diff) : "—"}</p>
@@ -2146,14 +2422,11 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                           <p className="text-xs text-stone-600">{msg}</p>
                           <div className="flex items-center justify-between gap-2 pt-1 border-t border-cocoa-100">
                             <p className="text-[11px] text-stone-500">{pricedItems.length} of {groceryItemsAll.length} items priced · prices are per package</p>
-                            <button onClick={priceWholeList} disabled={pricingAll} className="px-3 py-1.5 bg-cocoa-600 text-white text-xs rounded-xl disabled:opacity-70 flex items-center gap-1.5 flex-shrink-0">
-                              {pricingAll ? <><Spinner size={12} /> Pricing…</> : "Price my list"}
-                            </button>
+                            <button onClick={priceWholeList} disabled={pricingAll} className="px-3 py-1.5 bg-cocoa-600 text-white text-xs rounded-xl disabled:opacity-70 flex items-center gap-1.5 flex-shrink-0">{pricingAll ? <><Spinner size={12} /> Pricing…</> : "Price my list"}</button>
                           </div>
                         </div>
                       );
                     })()}
-
                     {storeOrder.map(store => {
                       const aisles = groceryByStore[store];
                       const storeAisles = prefs.stores[store] || defaultAisles;
@@ -2179,9 +2452,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                                 <span className="font-bold text-lg text-stone-800">{aisle}</span>
                                 <div className="flex items-center gap-1.5 text-sm">
                                   <span className="text-stone-500">Aisle</span>
-                                  <input type="number" value={storeAisles[aisle] || 99}
-                                    onChange={e => updateAisleNumber(store, aisle, e.target.value)}
-                                    className="w-14 px-1.5 py-1 rounded border text-center text-sm font-semibold" />
+                                  <input type="number" value={storeAisles[aisle] || 99} onChange={e => updateAisleNumber(store, aisle, e.target.value)} className="w-14 px-1.5 py-1 rounded border text-center text-sm font-semibold" />
                                 </div>
                               </div>
                               <ul className="divide-y divide-stone-100">
@@ -2190,30 +2461,28 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                                   const checked = !!groceryChecked[wk];
                                   const m = item.place.match;
                                   return (
-                                    <li key={item.key} className={`px-3 py-3 flex items-center gap-2 text-[15px] ${checked ? "opacity-50 line-through" : ""}`}>
-                                      <div className="w-12 flex justify-center flex-shrink-0">
+                                    <li key={item.key} className="px-3 py-3 flex items-start gap-2 text-[15px]">
+                                      <div className="w-12 flex justify-center flex-shrink-0 pt-0.5">
                                         <input type="checkbox" checked={checked} onChange={() => setGroceryChecked(c => ({ ...c, [wk]: !c[wk] }))} className="w-5 h-5 rounded" />
                                       </div>
-                                      <span className="flex-1 min-w-0">
-                                        {m ? (
-                                          <>
-                                            <span className="block leading-snug">{m.name}</span>
-                                            <span className="block text-xs text-stone-500">for {item.name}{m.aisle ? " · 📍 " + m.aisle : ""}{m.size || m.unitPrice ? " · " + [m.size, m.unitPrice].filter(Boolean).join(", ") : ""}</span>
-                                          </>
-                                        ) : item.name}
-                                        {item.place.others.length > 0 && <span className="block text-[11px] text-emerald-700">Best price ✓ · {item.place.others.map(o => `${o.store} $${o.price.toFixed(2)}`).join(" · ")}</span>}
-                                        <button onClick={() => openPriceSheet(item, item.place.store)} className="mr-2 text-xs text-cocoa-600 underline">{m ? "change / compare" : "find"}</button>
-                                        <button onClick={() => setEditingItemAisle(editingItemAisle === item.key ? null : item.key)} className="text-xs text-cocoa-600 underline">aisle</button>
-                                        {editingItemAisle === item.key && (
-                                          <select className="ml-1 text-sm border rounded px-1.5 py-0.5" defaultValue={item.aisle}
-                                            onChange={e => changeItemAisle(item.nameKey, e.target.value)}
-                                            onBlur={() => setEditingItemAisle(null)}>
-                                            {Object.keys(defaultAisles).map(a => <option key={a}>{a}</option>)}
-                                          </select>
-                                        )}
-                                      </span>
-                                      <span className="text-stone-600 w-16 text-right flex-shrink-0 text-sm font-medium">{item.amount} {item.unit}</span>
-                                      <span className={`w-14 text-right flex-shrink-0 text-sm ${m?.price != null ? "text-stone-700 font-medium" : "text-stone-400"}`} title={m?.estimated ? "Estimated from price per lb × average weight" : undefined}>{m?.price != null ? (m.estimated ? "~" : "") + "$" + m.price.toFixed(2) : "—"}</span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className={checked ? "opacity-50 line-through" : ""}>
+                                          <span className="block leading-snug">{m ? m.name : item.name}</span>
+                                          {m && <span className="block text-xs text-stone-500">for {item.name}{m.aisle ? " · 📍 " + m.aisle : ""}{m.size || m.unitPrice ? " · " + [m.size, m.unitPrice].filter(Boolean).join(", ") : ""}</span>}
+                                          {item.place.others.length > 0 && <span className="block text-[11px] text-emerald-700">Best price ✓ · {item.place.others.map(o => `${o.store} $${o.price.toFixed(2)}`).join(" · ")}</span>}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                                          <button onClick={() => openPriceSheet(item, item.place.store)} className="text-xs text-cocoa-600 underline">{m ? "change / compare" : "find"}</button>
+                                          <button onClick={() => setEditingItemAisle(editingItemAisle === item.key ? null : item.key)} className="text-xs text-cocoa-600 underline">aisle</button>
+                                          {editingItemAisle === item.key && (
+                                            <select className="text-sm border rounded px-1.5 py-0.5" defaultValue={item.aisle} onChange={e => changeItemAisle(item.nameKey, e.target.value)} onBlur={() => setEditingItemAisle(null)}>
+                                              {Object.keys(defaultAisles).map(a => <option key={a}>{a}</option>)}
+                                            </select>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <span className={`text-stone-600 w-16 text-right flex-shrink-0 text-sm font-medium pt-0.5 ${checked ? "opacity-50" : ""}`}>{item.amount} {item.unit}</span>
+                                      <span className={`w-14 text-right flex-shrink-0 text-sm pt-0.5 ${m?.price != null ? "text-stone-700 font-medium" : "text-stone-400"} ${checked ? "opacity-50" : ""}`} title={m?.estimated ? "Estimated from price per lb × average weight" : undefined}>{m?.price != null ? (m.estimated ? "~" : "") + "$" + m.price.toFixed(2) : "—"}</span>
                                       <button onClick={() => setGroceryRemoved(r => [...r, wk])} className="text-stone-400 text-base w-10 text-center flex-shrink-0">✕</button>
                                     </li>
                                   );
@@ -2226,9 +2495,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                     })}
                   </>
                 )}
-                {removedThisWeek.length > 0 && (
-                  <button onClick={() => setGroceryRemoved(r => r.filter(k => !k.startsWith(currentWeekKey + "|")))} className="text-xs text-stone-500 underline">Restore removed items ({removedThisWeek.length})</button>
-                )}
+                {removedThisWeek.length > 0 && <button onClick={() => setGroceryRemoved(r => r.filter(k => !k.startsWith(currentWeekKey + "|")))} className="text-xs text-stone-500 underline">Restore removed items ({removedThisWeek.length})</button>}
               </div>
             )}
 
@@ -2256,7 +2523,6 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   </button>
                   <p className="text-[11px] text-cocoa-500 text-center">Search your recipes, find new ones online, or create one with AI Chef below.</p>
                 </div>
-
                 {(webResults.length > 0 || webError) && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -2275,9 +2541,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                           <p className="text-[11px] text-stone-500">{r.site}</p>
                           {r.snippet && <p className="text-xs text-stone-600 mt-0.5 line-clamp-2">{r.snippet}</p>}
                           <div className="flex gap-3 mt-1.5">
-                            <button onClick={() => importWebResult(r)} disabled={webImportingId === r.id && r.kind === "mealdb"} className="text-xs font-semibold text-cocoa-700 flex items-center gap-1">
-                              {webImportingId === r.id && r.kind === "mealdb" ? <Spinner size={12} /> : "＋"} Import
-                            </button>
+                            <button onClick={() => importWebResult(r)} disabled={webImportingId === r.id && r.kind === "mealdb"} className="text-xs font-semibold text-cocoa-700 flex items-center gap-1">{webImportingId === r.id && r.kind === "mealdb" ? <Spinner size={12} /> : "＋"} Import</button>
                             {r.url && <a href={r.url} target="_blank" rel="noreferrer" className="text-xs text-stone-500 underline">Open ↗</a>}
                           </div>
                         </div>
@@ -2308,10 +2572,29 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
 
             {tab === "prefs" && (
               <div className="space-y-5">
+                <div className="bg-white rounded-2xl border p-4 space-y-2">
+                  <h3 className="font-semibold">Account</h3>
+                  {account.status === "in" ? (
+                    <>
+                      <p className="text-sm">Signed in as <b>@{account.username}</b> <span className="text-stone-500">({account.email})</span></p>
+                      <p className="text-xs text-stone-600">Plan: <b>Free trial</b> (no limits while testing)</p>
+                      <p className={`text-xs ${syncStatus === "error" ? "text-red-600" : "text-stone-500"}`}>
+                        {syncStatus === "saving" ? "☁ Saving…" : syncStatus === "error" ? "⚠ Couldn't save to your account (offline?). Changes are kept on this device and will retry." : "☁ All changes saved to your account"}
+                      </p>
+                      <button onClick={logOut} className="w-full py-2 rounded-xl bg-stone-100 text-sm font-medium">Log out</button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-stone-600">Using the app on this device only.</p>
+                      {FIREBASE_CONFIG && <button onClick={() => { localStorage.removeItem("fr_mode"); location.reload(); }} className="w-full py-2 rounded-xl bg-cocoa-600 text-white text-sm font-medium">Log in or create an account</button>}
+                    </>
+                  )}
+                </div>
+
                 <div className="bg-white rounded-2xl border p-4 space-y-3">
                   <h3 className="font-semibold">Family & Targets</h3>
                   <label className="block text-sm">Family Name
-                    <input type="text" value={prefs.familyName || ""} placeholder="e.g. Navarre"
+                    <input type="text" value={prefs.familyName || ""} placeholder="e.g. Smith"
                       onChange={e => setPrefs(p => ({ ...p, familyName: e.target.value }))}
                       className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100" />
                   </label>
@@ -2408,7 +2691,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
 
                 <div className="bg-cream-50 rounded-3xl border border-cocoa-100 p-4 space-y-3">
                   <h3 className="font-semibold">AI & Photo Keys (optional)</h3>
-                  <p className="text-xs text-cocoa-500">Stored only on this device. Free tiers have daily usage limits.</p>
+                  <p className="text-xs text-cocoa-500">Saved with your account. Free tiers have daily usage limits.</p>
                   <label className="block text-sm">Gemini API key (AI Chef)
                     <input type="password" value={prefs.geminiApiKey || ""} placeholder="AIza..."
                       onChange={e => setPrefs(p => ({ ...p, geminiApiKey: e.target.value }))}
@@ -2416,8 +2699,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   </label>
                   <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-xs text-cocoa-600 underline">Get free Gemini key →</a>
                   <label className="block text-sm mt-2">AI speed
-                    <select value={prefs.aiMode || "fast"} onChange={e => setPrefs(p => ({ ...p, aiMode: e.target.value }))}
-                      className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm bg-white">
+                    <select value={prefs.aiMode || "fast"} onChange={e => setPrefs(p => ({ ...p, aiMode: e.target.value }))} className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm bg-white">
                       <option value="fast">Fast (Gemini Flash-Lite) - recommended</option>
                       <option value="best">Most detailed (Gemini Flash) - slower</option>
                     </select>
@@ -2441,31 +2723,22 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   <h3 className="font-semibold pt-3 border-t border-cocoa-100">Store prices</h3>
                   <div className="flex gap-2">
                     <label className="block text-sm flex-1">Store location
-                      <input value={prefs.storeLocation || ""} placeholder="e.g. H-E-B Melissa"
-                        onChange={e => setPrefs(p => ({ ...p, storeLocation: e.target.value }))}
-                        className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
+                      <input value={prefs.storeLocation || ""} placeholder="e.g. H-E-B Melissa" onChange={e => setPrefs(p => ({ ...p, storeLocation: e.target.value }))} className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
                     </label>
                     <label className="block text-sm w-28">ZIP
-                      <input value={prefs.storeZip || ""} placeholder="75454" inputMode="numeric"
-                        onChange={e => setPrefs(p => ({ ...p, storeZip: e.target.value.replace(/\D/g, "").slice(0, 5) }))}
-                        className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
+                      <input value={prefs.storeZip || ""} placeholder="75454" inputMode="numeric" onChange={e => setPrefs(p => ({ ...p, storeZip: e.target.value.replace(/\D/g, "").slice(0, 5) }))} className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
                     </label>
                   </div>
                   <div className="bg-white rounded-2xl border border-cocoa-100 p-3 space-y-2 text-xs text-stone-700">
-                    <p className="text-sm font-semibold">“Send to Recipe App” bookmark <span className="text-[11px] font-normal text-stone-500">(version {BOOKMARK_VERSION})</span></p>
-                    <p>Lets you send a product's name, price and aisle from the store's website straight into your grocery list. <b>If you made the bookmark before, delete it and make it again</b>; older versions can't read the aisle.</p>
-                    <p><b>Computer:</b> drag this button to your bookmarks bar →{" "}
-                      <a ref={el => el && el.setAttribute("href", bookmarkletCode)} onClick={e => { e.preventDefault(); alert("Drag this button to your bookmarks bar instead of tapping it."); }}
-                        className="inline-block px-2.5 py-1 rounded-lg bg-cocoa-600 text-white font-semibold">Send to Recipe App</a></p>
-                    <p><b>Phone/tablet:</b> 1) tap Copy below. 2) Bookmark any page and rename it “Send to Recipe App”. 3) Edit that bookmark and paste the copied code as its address. To use it, on the product page type “Send to Recipe” in the address bar and tap the bookmark.</p>
-                    <button onClick={() => navigator.clipboard.writeText(bookmarkletCode).then(() => setToast("Bookmark code copied ✓"), () => prompt("Copy this code:", bookmarkletCode))}
-                      className="w-full py-2 rounded-xl bg-stone-100 font-medium text-sm">📋 Copy bookmark code</button>
-                    <p className="text-[11px] text-stone-500">Rebuild the bookmark if this app moves to a different web address.</p>
+                    <p className="text-sm font-semibold">“Send to Recipe App” button</p>
+                    <p>One tap on an H-E-B, Kroger or Walmart product page sends the name, price and aisle to your grocery list.</p>
+                    {(prefs.bookmarkVersion || 0) >= BOOKMARK_VERSION
+                      ? <p className="text-emerald-700 font-medium">✓ Added (version {BOOKMARK_VERSION})</p>
+                      : prefs.bookmarkVersion ? <p className="text-amber-700 font-medium">Update needed: delete your old bookmark and add the new one.</p> : null}
+                    <button onClick={openBookmarkHelper} className="w-full py-2.5 rounded-xl bg-cocoa-600 text-white font-semibold text-sm">⭐ {(prefs.bookmarkVersion || 0) >= BOOKMARK_VERSION ? "Add it to another browser" : "Add it to my browser"}</button>
                   </div>
                   <label className="block text-sm">Price lookup service URL (optional, automatic pricing)
-                    <input value={prefs.priceApiUrl || ""} placeholder="https://your-worker.workers.dev/prices"
-                      onChange={e => setPrefs(p => ({ ...p, priceApiUrl: e.target.value }))}
-                      className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
+                    <input value={prefs.priceApiUrl || ""} placeholder="https://your-worker.workers.dev/prices" onChange={e => setPrefs(p => ({ ...p, priceApiUrl: e.target.value }))} className="mt-1 w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
                   </label>
 
                 </div>
@@ -2741,7 +3014,6 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
               </div>
             </div>
           )}
-
           {aiError && (
             <div className="fixed inset-0 z-[75] bg-black/50 flex items-center justify-center p-4">
               <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl">
@@ -2754,9 +3026,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
               </div>
             </div>
           )}
-
-          {toast && <div className="fixed left-1/2 -translate-x-1/2 bottom-24 z-[90] bg-stone-900 text-white text-sm px-4 py-2.5 rounded-2xl shadow-lg max-w-[90vw]">{toast}</div>}
-
+          {toast && <div className="fixed left-1/2 -translate-x-1/2 bottom-24 z-[110] bg-stone-900 text-white text-sm px-4 py-2.5 rounded-2xl shadow-lg max-w-[90vw]">{toast}</div>}
           {cookingRecipe && <CookingMode recipe={cookingRecipe} onClose={() => setCookingRecipe(null)} />}
 
           {priceSheet && (() => {
@@ -2765,6 +3035,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
             const searchLink = storeSearchUrl(storeName, ps.item.name);
             const setManual = (k, v) => setPriceSheet({ ...ps, manual: { ...ps.manual, [k]: v } });
             const offers = offersFor(ps.item.nameKey);
+            const bookmarkOk = (prefs.bookmarkVersion || 0) >= BOOKMARK_VERSION;
             return (
               <div className="fixed inset-0 z-[65] bg-black/40 flex items-end sm:items-center justify-center">
                 <div className="bg-white w-full max-w-lg max-h-[90vh] rounded-t-[2rem] sm:rounded-[2rem] overflow-hidden flex flex-col">
@@ -2773,15 +3044,9 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                       <h2 className="text-lg font-bold">{ps.item.name}</h2>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <span className="text-[11px] text-stone-500">Price at:</span>
-                        {storeNames.map(st => {
-                          const o = offers.find(x => x.store === st);
-                          return (
-                            <button key={st} onClick={() => openPriceSheet(ps.item, st)}
-                              className={`px-2.5 py-1 rounded-full text-xs border ${st === storeName ? "bg-cocoa-600 text-white border-cocoa-600" : "bg-white"}`}>
-                              {st}{o?.price != null ? ` $${o.price.toFixed(2)}` : ""}
-                            </button>
-                          );
-                        })}
+                        {storeNames.map(st => { const o = offers.find(x => x.store === st); return (
+                          <button key={st} onClick={() => openPriceSheet(ps.item, st)} className={`px-2.5 py-1 rounded-full text-xs border ${st === storeName ? "bg-cocoa-600 text-white border-cocoa-600" : "bg-white"}`}>{st}{o?.price != null ? ` $${o.price.toFixed(2)}` : ""}</button>
+                        ); })}
                       </div>
                     </div>
                     <button onClick={() => setPriceSheet(null)} className="text-xl">✕</button>
@@ -2792,8 +3057,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                     {ps.results.length > 0 && (
                       <div className="space-y-2">
                         {ps.results.map((p, idx) => (
-                          <button key={idx} onClick={() => applyProduct(p)}
-                            className={`w-full text-left rounded-2xl border p-3 flex gap-3 items-center ${idx === 0 ? "border-emerald-400 bg-emerald-50" : ""}`}>
+                          <button key={idx} onClick={() => applyProduct(p)} className={`w-full text-left rounded-2xl border p-3 flex gap-3 items-center ${idx === 0 ? "border-emerald-400 bg-emerald-50" : ""}`}>
                             {p.image && <img src={p.image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />}
                             <div className="flex-1 min-w-0">
                               {idx === 0 && <span className="text-[10px] font-bold uppercase text-emerald-700">Recommended</span>}
@@ -2805,46 +3069,42 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                         ))}
                       </div>
                     )}
-
                     {ps.linkMsg && <p className="text-xs text-cocoa-800 bg-amber-50 border border-amber-200 rounded-xl p-2.5">{ps.linkMsg}</p>}
-
                     <div className="rounded-2xl border border-cocoa-100 bg-cream-50 p-3 space-y-3">
                       <div className="flex gap-2.5">
                         <span className="w-6 h-6 rounded-full bg-cocoa-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
                         <div className="flex-1">
                           <button onClick={() => window.open(searchLink, "fr_store")} className="w-full py-2.5 rounded-xl bg-cocoa-600 text-white text-sm font-semibold">Open {storeName} search for “{ps.item.name}” ↗</button>
-                          <p className="text-xs text-stone-600 mt-1">Tap the product that matches to open its page. Make sure your store (e.g. H-E-B Melissa) is selected on their site so the aisle shows.</p>
+                          <p className="text-xs text-stone-600 mt-1">Tap the matching product to open its page. Make sure your store is selected on their site so the aisle shows.</p>
                         </div>
                       </div>
                       <div className="flex gap-2.5">
                         <span className="w-6 h-6 rounded-full bg-cocoa-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
                         <div className="flex-1 text-xs text-stone-700 space-y-2">
-                          <p><b>Bookmark set up?</b> On the product page, tap your <b>Send to Recipe App</b> bookmark. The name, price and aisle come back here automatically.</p>
-                          <p><b>No bookmark?</b> Copy the product page's link (Share → Copy), come back, and tap:</p>
+                          {bookmarkOk
+                            ? <p>On the product page, tap your <b>Send to Recipe App</b> bookmark. The name, price and aisle come back here automatically.</p>
+                            : <button onClick={openBookmarkHelper} className="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold">⭐ {prefs.bookmarkVersion ? "Update" : "Set up"} the “Send to Recipe App” button (30 sec)</button>}
+                          <p><b>Or</b> copy the product page's link (Share → Copy), come back, and tap:</p>
                           <button onClick={pasteProductLink} disabled={ps.linkBusy} className="w-full py-2 rounded-xl bg-white border text-sm font-medium flex items-center justify-center gap-1.5">{ps.linkBusy ? <Spinner size={14} /> : "📋"} Paste product link</button>
                           <div className="flex gap-2">
                             <input value={ps.linkInput || ""} onChange={e => setPriceSheet({ ...ps, linkInput: e.target.value })} placeholder="…or paste the link here" className="flex-1 text-sm px-3 py-2 rounded-lg border" />
                             <button onClick={() => useProductLink(ps.linkInput)} className="px-3 py-2 bg-stone-800 text-white text-sm rounded-lg">Use</button>
                           </div>
-                          <p className="text-[11px] text-stone-500">Set up the bookmark once in Prefs → Store prices.</p>
                         </div>
                       </div>
                     </div>
-
                     <div className="bg-stone-50 rounded-2xl p-3 space-y-2">
                       <p className="text-xs font-medium text-stone-600">{storeName} product details (saved for next time)</p>
                       <input value={ps.manual.name} onChange={e => setManual("name", e.target.value)} placeholder="Product (e.g. Fresh White Onion)" className="w-full text-sm px-3 py-2 rounded-lg border" />
                       <div className="flex gap-2">
                         <input value={ps.manual.price} onChange={e => setManual("price", e.target.value)} inputMode="decimal" placeholder="Price $" className="w-28 text-sm px-3 py-2 rounded-lg border" />
-                        <input value={ps.manual.aisle} onChange={e => setManual("aisle", e.target.value)} placeholder="Aisle (e.g. Back Edge of Produce)" className={`flex-1 text-sm px-3 py-2 rounded-lg border ${ps.debug && !ps.manual.aisle ? "border-amber-400 ring-2 ring-amber-200" : ""}`} />
+                        <input value={ps.manual.aisle} onChange={e => setManual("aisle", e.target.value)} placeholder="Aisle (e.g. Aisle 21)" className={`flex-1 text-sm px-3 py-2 rounded-lg border ${ps.debug && !ps.manual.aisle ? "border-amber-400 ring-2 ring-amber-200" : ""}`} />
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => { const m = ps.manual; saveStoreMatch(storeName, ps.item.nameKey, { name: m.name.trim() || ps.item.name, price: m.price === "" ? null : Number(String(m.price).replace(/[^0-9.]/g, "")) || null, aisle: m.aisle.trim(), url: m.url || "", size: m.size || "", unitPrice: m.unitPrice || "" }); setPriceSheet(null); pendingPick.current = null; setToast(`Saved ✓ (${storeName})`); }}
-                          className="flex-1 py-2 bg-cocoa-600 text-white rounded-xl text-sm font-medium">Save</button>
+                        <button onClick={() => { const m = ps.manual; saveStoreMatch(storeName, ps.item.nameKey, { name: m.name.trim() || ps.item.name, price: m.price === "" ? null : Number(String(m.price).replace(/[^0-9.]/g, "")) || null, aisle: m.aisle.trim(), url: m.url || "", size: m.size || "", unitPrice: m.unitPrice || "" }); setPriceSheet(null); pendingPick.current = null; setToast(`Saved ✓ (${storeName})`); }} className="flex-1 py-2 bg-cocoa-600 text-white rounded-xl text-sm font-medium">Save</button>
                         {allMatches[storeName]?.[ps.item.nameKey] && <button onClick={() => { saveStoreMatch(storeName, ps.item.nameKey, null); setPriceSheet(null); }} className="px-3 py-2 bg-white border rounded-xl text-sm">Remove {storeName} price</button>}
                       </div>
                     </div>
-
                     {ps.debug && (
                       <details className="bg-stone-50 rounded-2xl p-3 text-xs">
                         <summary className="cursor-pointer font-medium text-stone-700">What the bookmark saw (copy this and send it to me so I can fix the aisle reader)</summary>
@@ -2858,7 +3118,23 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
             );
           })()}
 
-          {favoritePrompt && (
+          {bookmarkHelpOpen && <BookmarkHelper code={bookmarkletCode} copied={bookmarkCopied}
+            onCopy={() => navigator.clipboard.writeText(bookmarkletCode).then(() => setBookmarkCopied(true), () => prompt("Copy this code:", bookmarkletCode))}
+            onClose={() => setBookmarkHelpOpen(false)}
+            onDone={() => { setPrefs(p => ({ ...p, bookmarkVersion: BOOKMARK_VERSION })); setBookmarkHelpOpen(false); setToast("Great! Use it on any H-E-B, Kroger or Walmart product page."); }} />}
+
+          {appReady && !prefs.onboarded && <OnboardingModal prefs={prefs} setPrefs={setPrefs} onGoToPrefs={() => setTab("prefs")} />}
+
+          {!appReady && (
+            account.status === "loading" || account.status === "syncing"
+              ? <div className="fixed inset-0 z-[100] bg-cream-50 flex flex-col items-center justify-center gap-3 text-cocoa-600"><Spinner size={40} className="border-4" /><p className="text-sm">{account.status === "syncing" ? "Loading your recipes…" : "Starting up…"}</p></div>
+              : <AuthScreen configured={!!FIREBASE_CONFIG} loadError={!!account.loadError} errorMessage={account.status === "error" ? account.message : ""}
+                  onLocal={() => { localStorage.setItem("fr_mode", "local"); setAccount({ status: "local" }); }}
+                  onSignedUp={(user) => handleSignedIn(user, { isNew: true })}
+                  onRetry={() => location.reload()} />
+          )}
+
+          {favoritePrompt && appReady && prefs.onboarded && (
             <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
               <div className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-xl">
                 <p className="font-semibold text-lg mb-2">Make it a favorite?</p>
