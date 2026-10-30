@@ -1,13 +1,13 @@
 {
-  "name": "Family Recipe Planner",
-  "short_name": "Recipes",
+  "name": "Recipeak",
+  "short_name": "Recipeak",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#fdf8f1",
   "theme_color": "#fdf8f1",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "recipeak-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "recipeak-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
