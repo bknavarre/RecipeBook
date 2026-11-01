@@ -3,5 +3,5 @@ main = "kroger-worker.js"
 compatibility_date = "2026-10-01"
 
 [vars]
-ALLOWED_ORIGIN = "https://YOUR-GITHUB-USERNAME.github.io"
+ALLOWED_ORIGIN = "https://bknavarre.github.io"
 # DEFAULT_KROGER_LOCATION_ID = "optional-store-id"
