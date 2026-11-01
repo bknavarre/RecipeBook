@@ -1,0 +1,14 @@
+{
+  "name": "Recipeak",
+  "short_name": "Recipeak",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fdf8f1",
+  "theme_color": "#fdf8f1",
+  "icons": [
+    { "src": "./recipeak-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./recipeak-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

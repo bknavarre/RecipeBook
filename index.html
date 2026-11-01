@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
-
   <title>Recipeak</title>
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
-  <link rel="icon" type="image/png" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./recipeak-icon-192.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
   <meta name="apple-mobile-web-app-title" content="Recipeak" />
   <meta name="application-name" content="Recipeak" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1313,8 +1312,83 @@
       );
     }
 
+
+    // ========== PASTED RECIPE IMPORT ==========
+    function parsePastedRecipeText(rawText, sourceLabel = "") {
+      const text = String(rawText || "").replace(/\r/g, "").replace(/\u00a0/g, " ").trim();
+      if (!text) throw new Error("Paste a recipe first.");
+      const lines = text.split("\n").map(l => l.replace(/^\s*[•●▪◦*-]\s*/, "").trim());
+      const nonEmpty = lines.filter(Boolean);
+      const heading = (line) => String(line || "").replace(/[:：]\s*$/, "").trim().toLowerCase();
+      const isIngredientHeading = l => /^(ingredients?|what you(?:'|’)ll need|you will need|for the (?:sauce|filling|dough|topping|marinade|chicken|meat|vegetables?))$/i.test(heading(l));
+      const isInstructionHeading = l => /^(instructions?|directions?|method|preparation|steps?|how to make(?: it)?)$/i.test(heading(l));
+      const isNutritionHeading = l => /^(nutrition|nutrition facts|nutritional information|nutrition per serving)$/i.test(heading(l));
+      const isNotesHeading = l => /^(notes?|tips?)$/i.test(heading(l));
+      let ingStart = lines.findIndex(isIngredientHeading);
+      let stepStart = lines.findIndex(isInstructionHeading);
+      let nutStart = lines.findIndex(isNutritionHeading);
+      let notesStart = lines.findIndex(isNotesHeading);
+      const sectionEnds = (start) => [ingStart, stepStart, nutStart, notesStart].filter(x => x > start).sort((a,b) => a-b)[0] ?? lines.length;
+
+      let title = nonEmpty.find(l => !isIngredientHeading(l) && !isInstructionHeading(l) && !isNutritionHeading(l) && !/^(serves|servings|yield|makes)\b/i.test(l)) || "Pasted Recipe";
+      title = title.replace(/^#+\s*/, "").replace(/\s*recipe\s*$/i, "").trim() || "Pasted Recipe";
+      const servesMatch = text.match(/(?:serves?|servings?|yield|makes)\s*:?\s*(\d{1,3})/i);
+      const baseServings = servesMatch ? Number(servesMatch[1]) : 4;
+      const servingsEstimated = !servesMatch;
+
+      let ingredientLines = [];
+      if (ingStart >= 0) ingredientLines = lines.slice(ingStart + 1, sectionEnds(ingStart)).filter(Boolean);
+      if (!ingredientLines.length && stepStart > 0) {
+        ingredientLines = lines.slice(1, stepStart).filter(l => !/^(serves|servings|yield|makes)\b/i.test(l));
+      }
+      ingredientLines = ingredientLines.filter(l => !isIngredientHeading(l) && !isInstructionHeading(l) && l.length < 180);
+      const ingredients = ingredientLines.slice(0, 50).map(line => {
+        const cleaned = line.replace(/^\s*\d+[.)]\s*/, "").trim();
+        const parsed = parseIngredientLine(cleaned);
+        if (/\bto taste\b/i.test(cleaned)) parsed.unit = "to taste";
+        return parsed;
+      }).filter(i => i.name);
+
+      let stepLines = [];
+      if (stepStart >= 0) stepLines = lines.slice(stepStart + 1, sectionEnds(stepStart)).filter(Boolean);
+      if (!stepLines.length) {
+        stepLines = nonEmpty.filter(l => /^\s*(?:step\s*)?\d+[.)-]\s+/.test(l));
+      }
+      stepLines = stepLines.map(l => l.replace(/^\s*(?:step\s*)?\d+[.)-]\s*/i, "").trim()).filter(Boolean);
+      if (stepLines.length === 1 && stepLines[0].length > 180) {
+        stepLines = stepLines[0].split(/(?<=[.!?])\s+(?=[A-Z])/).filter(Boolean);
+      }
+      const instructions = stepLines.length ? stepLines.map((x, i) => `${i + 1}. ${x}`).join("\n") : "";
+
+      const nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+      const nutritionPatterns = {
+        calories: /calories?\s*:?\s*(\d+(?:\.\d+)?)/i,
+        protein: /protein\s*:?\s*(\d+(?:\.\d+)?)\s*g?/i,
+        carbs: /(?:carbohydrates?|carbs)\s*:?\s*(\d+(?:\.\d+)?)\s*g?/i,
+        fat: /(?:total\s+)?fat\s*:?\s*(\d+(?:\.\d+)?)\s*g?/i,
+        fiber: /fib(?:er|re)\s*:?\s*(\d+(?:\.\d+)?)\s*g?/i
+      };
+      Object.entries(nutritionPatterns).forEach(([k,re]) => { const m=text.match(re); if(m) nutrition[k]=Number(m[1]); });
+      const nutritionProvided = Object.values(nutrition).some(v => v > 0);
+      const category = /breakfast|brunch|pancake|waffle|omelet/i.test(title) ? "Breakfast" : /dessert|cake|cookie|pie|brownie/i.test(title) ? "Dessert" : /lunch|sandwich|salad/i.test(title) ? "Lunch" : "Dinner";
+      const confidence = (title !== "Pasted Recipe" ? 0.2 : 0) + (ingredients.length >= 2 ? 0.4 : 0) + (stepLines.length >= 1 ? 0.3 : 0) + (servesMatch ? 0.1 : 0);
+      return {
+        title, category, dietTags: [], baseServings, servingsEstimated,
+        nutrition, nutritionProvided,
+        ingredients: ingredients.length ? ingredients : [{ name: "Ingredient (edit)", amount: 1, unit: "", aisle: "Other" }],
+        instructions: instructions || "Add instructions.", image: null, url: "",
+        source: { type: "pasted", label: sourceLabel.trim() },
+        pasteConfidence: confidence
+      };
+    }
+
     // ========== ADD RECIPE MODAL (proper component) ==========
-    function AddRecipeModal({ importPreview, importUrl, setImportUrl, importLoading, importStatus, tryImportUrl, handlePhotoUpload, onSave, onClose }) {
+    function AddRecipeModal({ importPreview, importUrl, setImportUrl, importLoading, importStatus, tryImportUrl, handlePhotoUpload, onParsePaste, onSave, onClose }) {
+      const [pasteText, setPasteText] = useState("");
+      const [pasteSource, setPasteSource] = useState("Copilot");
+      const [pasteBusy, setPasteBusy] = useState(false);
+      const [pasteError, setPasteError] = useState("");
+      const [importMode, setImportMode] = useState("choose");
       const [form, setForm] = useState(importPreview || {
         title: "", category: "Dinner", dietTags: [], baseServings: 4,
         nutrition: { calories: 400, protein: 25, carbs: 30, fat: 15, fiber: 5 },
@@ -1323,8 +1397,24 @@
       });
 
       useEffect(() => {
-        if (importPreview) setForm(importPreview);
+        if (importPreview) { setForm(importPreview); setImportMode("review"); }
       }, [importPreview]);
+      const pasteClipboard = async () => {
+        try {
+          const t = await navigator.clipboard.readText();
+          if (!t) throw new Error("Clipboard is empty.");
+          setPasteText(t); setPasteError("");
+        } catch {
+          setPasteError("Couldn't access the clipboard. Press and hold inside the box and choose Paste.");
+        }
+      };
+      const readPastedRecipe = async () => {
+        if (!pasteText.trim()) { setPasteError("Paste a recipe first."); return; }
+        setPasteBusy(true); setPasteError("");
+        try { await onParsePaste(pasteText, pasteSource); setImportMode("review"); }
+        catch (e) { setPasteError(e.message || "Recipeak couldn't read that recipe."); }
+        finally { setPasteBusy(false); }
+      };
 
       const updateIng = (idx, field, val) => {
         setForm(f => {
@@ -1347,18 +1437,48 @@
               <button onClick={onClose} className="text-xl">✕</button>
             </div>
             <div className="p-4 overflow-y-auto flex-1 space-y-4">
-              <div className="bg-stone-50 rounded-2xl p-3 space-y-2">
-                <p className="text-xs font-medium text-stone-600">Quick import</p>
-                <div className="flex gap-2">
-                  <input value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="Paste recipe URL..." className="flex-1 text-sm px-3 py-2 rounded-lg border" />
-                  <button onClick={() => tryImportUrl()} disabled={importLoading} className="px-3 py-2 bg-stone-800 text-white text-sm rounded-lg disabled:opacity-70 min-w-[64px] flex items-center justify-center">{importLoading ? <Spinner size={18} /> : "Fetch"}</button>
-                </div>
-                {importLoading && <p className="text-xs text-cocoa-600 flex items-center gap-1.5"><Spinner size={12} /> {importStatus || "Working…"}</p>}
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <span className="px-3 py-1.5 bg-white border rounded-lg">📷 Upload photo / screenshot</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-                </label>
-              </div>
+                {importMode === "choose" && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-stone-600">How would you like to add your recipe?</p>
+                    <button type="button" onClick={() => setImportMode("paste")} className="w-full text-left p-4 rounded-2xl bg-cocoa-50 border-2 border-cocoa-300 flex gap-3 items-center">
+                      <span className="text-3xl">📋</span><span><b className="block text-cocoa-800">Paste Recipe</b><span className="text-xs text-stone-600">From Copilot, Notes, email, messages, or anywhere else</span></span>
+                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button type="button" onClick={() => setImportMode("website")} className="p-3 rounded-2xl bg-white border text-left"><span className="text-xl">🌐</span><b className="block text-sm">Website</b><span className="text-[11px] text-stone-500">Paste a link</span></button>
+                      <label className="p-3 rounded-2xl bg-white border text-left cursor-pointer"><span className="text-xl">📷</span><b className="block text-sm">Photo</b><span className="text-[11px] text-stone-500">Card or screenshot</span><input type="file" accept="image/*" className="hidden" onChange={e => { handlePhotoUpload(e); setImportMode("review"); }} /></label>
+                      <button type="button" onClick={() => setImportMode("review")} className="p-3 rounded-2xl bg-white border text-left"><span className="text-xl">✏️</span><b className="block text-sm">Manual</b><span className="text-[11px] text-stone-500">Start blank</span></button>
+                    </div>
+                  </div>
+                )}
+                {importMode === "paste" && (
+                  <div className="bg-cocoa-50 rounded-2xl p-4 space-y-3 border border-cocoa-200">
+                    <button type="button" onClick={() => setImportMode("choose")} className="text-xs text-cocoa-600">← All import options</button>
+                    <div><h3 className="font-display text-xl font-semibold text-cocoa-800">📋 Paste Recipe</h3><p className="text-xs text-stone-600 mt-1">Paste the whole recipe. Recipeak will organize the title, servings, ingredients, directions, and nutrition.</p></div>
+                    <textarea value={pasteText} onChange={e => setPasteText(e.target.value)} rows={12} placeholder={'Creamy Garlic Chicken\n\nServes 6\n\nIngredients:\n2 lb chicken breasts\n...\n\nInstructions:\n1. Season the chicken...'} className="w-full px-3 py-2.5 rounded-2xl border bg-white text-sm font-sans" />
+                    <button type="button" onClick={pasteClipboard} className="w-full py-2 rounded-xl bg-white border text-sm font-medium">📋 Paste from Clipboard</button>
+                    <label className="block text-xs text-stone-600">Source (optional)
+                      <input value={pasteSource} onChange={e => setPasteSource(e.target.value)} placeholder="Copilot, Grandma's recipe, email..." className="mt-1 w-full px-3 py-2 rounded-xl border bg-white text-sm" />
+                    </label>
+                    {pasteError && <p className="text-xs text-red-600 bg-red-50 rounded-xl p-2">{pasteError}</p>}
+                    <button type="button" disabled={pasteBusy || !pasteText.trim()} onClick={readPastedRecipe} className="w-full py-3 rounded-2xl bg-cocoa-600 text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2">{pasteBusy ? <><Spinner size={16} /> Reading recipe…</> : "✨ Read Recipe"}</button>
+                    <p className="text-[11px] text-center text-stone-500">You'll review everything before it is saved.</p>
+                  </div>
+                )}
+                {importMode === "website" && (
+                  <div className="bg-stone-50 rounded-2xl p-3 space-y-2">
+                    <button type="button" onClick={() => setImportMode("choose")} className="text-xs text-cocoa-600">← All import options</button>
+                    <p className="text-xs font-medium text-stone-600">Import from a recipe website</p>
+                    <div className="flex gap-2">
+                      <input value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="Paste recipe URL..." className="flex-1 text-sm px-3 py-2 rounded-lg border" />
+                      <button onClick={() => tryImportUrl()} disabled={importLoading} className="px-3 py-2 bg-stone-800 text-white text-sm rounded-lg disabled:opacity-70 min-w-[64px] flex items-center justify-center">{importLoading ? <Spinner size={18} /> : "Fetch"}</button>
+                    </div>
+                    {importLoading && <p className="text-xs text-cocoa-600 flex items-center gap-1.5"><Spinner size={12} /> {importStatus || "Working…"}</p>}
+                  </div>
+                )}
+                {importMode === "review" && <button type="button" onClick={() => setImportMode("choose")} className="text-xs text-cocoa-600">← Change import method</button>}
+                {importMode === "review" && form.servingsEstimated && <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-3 text-xs">⚠ Servings weren't included. Recipeak assumed 4. Change the servings below if needed.</div>}
+                {importMode === "review" && form.nutritionProvided === false && <div className="bg-stone-50 border rounded-2xl p-3 text-xs text-stone-600">Nutrition wasn't included. The values below are left at zero for you to enter or estimate later.</div>}
+                {importMode === "review" && <>
               <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Recipe title" className="w-full px-3 py-2 rounded-2xl border border-cocoa-100 font-medium" />
               <div className="flex gap-2">
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="px-3 py-2 rounded-2xl border border-cocoa-100 text-sm">
@@ -1395,10 +1515,11 @@
               </div>
               <textarea value={form.instructions} onChange={e => setForm({ ...form, instructions: e.target.value })} placeholder="Instructions..." rows={5} className="w-full px-3 py-2 rounded-2xl border border-cocoa-100 text-sm" />
               {form.image && <img src={form.image} alt="preview" className="w-full h-40 object-cover rounded-2xl" />}
+                </>}
             </div>
-            <div className="p-4 border-t">
+            {importMode === "review" && <div className="p-4 border-t">
               <button onClick={() => { if (!form.title.trim()) return alert("Title required"); onSave(form); }} className="w-full py-3 bg-cocoa-600 text-white rounded-2xl font-medium">Save Recipe</button>
-            </div>
+            </div>}
           </div>
         </div>
       );
@@ -1725,6 +1846,23 @@
         setImportPreview(null);
         setImportUrl("");
       }, []);
+
+      const parsePastedRecipe = async (text, sourceLabel) => {
+        let recipe = parsePastedRecipeText(text, sourceLabel);
+        const key = (prefs.geminiApiKey || "").trim();
+        if (recipe.pasteConfidence < 0.7 && key) {
+          try {
+            const aiRecipe = await callGeminiRecipe(key,
+              `Extract and organize this pasted recipe. Preserve the listed ingredients, quantities, servings, nutrition, and directions. Do not invent ingredients. If a value is missing, use a conservative placeholder. Pasted recipe:\n\n${text.slice(0, 18000)}`,
+              { mode: prefs.aiMode || "fast", onProgress: p => setImportStatus(describeAiProgress(p)) });
+            recipe = { ...aiRecipe, source: { type: "pasted", label: sourceLabel.trim() }, servingsEstimated: !/(serves?|servings?|yield|makes)\s*:?\s*\d/i.test(text), nutritionProvided: /calories?|protein|carbs?|fat|fiber/i.test(text) };
+          } catch (e) {
+            setToast("Used Recipeak's local parser because AI parsing was unavailable.");
+          }
+        }
+        setImportPreview(recipe);
+        return recipe;
+      };
 
       const tryImportUrl = async (urlArg) => {
         let url = (typeof urlArg === "string" ? urlArg : importUrl).trim();
@@ -3015,6 +3153,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
               importStatus={importStatus}
               tryImportUrl={tryImportUrl}
               handlePhotoUpload={handlePhotoUpload}
+              onParsePaste={parsePastedRecipe}
               onSave={addRecipe}
               onClose={() => { setShowAdd(false); setImportPreview(null); }}
             />
