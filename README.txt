@@ -1,19 +1,14 @@
-RECIPEAK SITE PACKAGE
+RECIPEAK PHOTO PICKER UPDATE
 
-This ZIP is ready to upload to the ROOT of the RecipeBook GitHub repository.
-Upload the files themselves so index.html, manifest.webmanifest, and all three PNG files sit beside one another.
+Upload these files to the root of your RecipeBook GitHub repository.
+Replace index.html and the existing icon/manifest files when prompted.
 
-Included:
-- index.html: Recipeak app with Paste Recipe and the supplied Firebase configuration
-- apple-touch-icon.png: iPhone home-screen icon (180x180)
-- recipeak-icon-192.png: standard web-app icon
-- recipeak-icon-512.png: large web-app icon
-- manifest.webmanifest: Recipeak PWA metadata
+New Find Photo behavior:
+1. Open a recipe and tap Find photo.
+2. Search results appear inside Recipeak.
+3. Tap a photo to preview it.
+4. Recipeak asks whether to use the photo for the recipe you were viewing.
+5. Tap Use Photo to save it to that exact recipe; account sync then persists it.
+6. Choose another returns to the same photo results.
 
-GitHub steps:
-1. Unzip this package.
-2. In the RecipeBook repository, choose Add file > Upload files.
-3. Upload all five app files and replace index.html when prompted.
-4. Commit the changes and wait 1-2 minutes for GitHub Pages.
-
-If an older Home Screen icon exists on an iPhone, remove it and add Recipeak to the Home Screen again after deployment.
+Google Images, Bing Images, URL paste, upload, and Recipeak's current in-app photo sources remain available as fallbacks.
