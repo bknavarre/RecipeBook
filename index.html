@@ -32,8 +32,8 @@
             sans: ['Nunito', 'system-ui', 'sans-serif']
           },
           boxShadow: {
-            'pearmint': '0 10px 30px -5px rgba(92, 65, 50, 0.08), 0 4px 12px -2px rgba(92, 65, 50, 0.04)',
-            'pearmint-card': '0 8px 24px -4px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04)'
+            'recipeak': '0 10px 30px -5px rgba(92, 65, 50, 0.08), 0 4px 12px -2px rgba(92, 65, 50, 0.04)',
+            'recipeak-card': '0 8px 24px -4px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04)'
           }
         }
       }
@@ -1152,7 +1152,7 @@
               {errorMessage && <p className="text-sm text-red-700 bg-red-50 rounded-2xl p-3 mb-4">{errorMessage} <button onClick={onRetry} className="underline font-medium">Try again</button></p>}
 
               {mode === "welcome" && (
-                <div className="bg-white rounded-3xl border border-cocoa-100 shadow-pearmint p-6 space-y-3">
+                <div className="bg-white rounded-3xl border border-cocoa-100 shadow-recipeak p-6 space-y-3">
                   <p className="text-center font-bold text-lg text-cocoa-800">Do you have an account?</p>
                   {canAccounts ? (
                     <>
@@ -1171,7 +1171,7 @@
               )}
 
               {mode === "login" && (
-                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-pearmint p-6 space-y-3" onSubmit={e => { e.preventDefault(); run(() => accountLogIn({ id: f.id, password: f.password })); }}>
+                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-recipeak p-6 space-y-3" onSubmit={e => { e.preventDefault(); run(() => accountLogIn({ id: f.id, password: f.password })); }}>
                   <p className="font-bold text-lg text-cocoa-800">Log in</p>
                   <input className={input} placeholder="Username or email" autoComplete="username" autoCapitalize="none" value={f.id} onChange={set("id")} required />
                   <input className={input} type="password" placeholder="Password" autoComplete="current-password" value={f.password} onChange={set("password")} required />
@@ -1185,7 +1185,7 @@
               )}
 
               {mode === "signup" && (
-                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-pearmint p-6 space-y-3" onSubmit={e => {
+                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-recipeak p-6 space-y-3" onSubmit={e => {
                   e.preventDefault();
                   if (f.password !== f.confirm) { setErr("Passwords don't match."); return; }
                   run(async () => { const user = await accountSignUp({ username: f.username, email: f.email, password: f.password }); onSignedUp(user); });
@@ -1205,7 +1205,7 @@
               )}
 
               {mode === "reset" && (
-                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-pearmint p-6 space-y-3" onSubmit={e => { e.preventDefault(); run(async () => { await accountReset(f.id); setMsg("Check your email for a link to reset your password."); }); }}>
+                <form className="bg-white rounded-3xl border border-cocoa-100 shadow-recipeak p-6 space-y-3" onSubmit={e => { e.preventDefault(); run(async () => { await accountReset(f.id); setMsg("Check your email for a link to reset your password."); }); }}>
                   <p className="font-bold text-lg text-cocoa-800">Reset your password</p>
                   <input className={input} placeholder="Username or email" autoCapitalize="none" value={f.id} onChange={set("id")} required />
                   {err && <p className="text-sm text-red-600 font-medium">{err}</p>}
@@ -1220,7 +1220,7 @@
       );
     }
 
-    // ========== PEARMINTS-INSPIRED MULTI-STEP SETUP WIZARD ==========
+    // ========== RECIPEAK MULTI-STEP SETUP WIZARD ==========
     function MultiStepOnboarding({ prefs, setPrefs, onComplete }) {
       const [step, setStep] = useState(1);
       const [formData, setFormData] = useState({
@@ -1279,7 +1279,7 @@
                 <span className="text-5xl">👨‍👩‍👧‍👦</span>
                 <h2 className="font-display text-3xl font-bold text-cocoa-800">Welcome to Recipeak</h2>
                 <p className="text-sm text-stone-600">Let's tailor your weekly meal planning.</p>
-                <div className="space-y-4 bg-white p-5 rounded-3xl border border-cocoa-100 shadow-pearmint text-left">
+                <div className="space-y-4 bg-white p-5 rounded-3xl border border-cocoa-100 shadow-recipeak text-left">
                   <label className="block text-sm font-bold text-cocoa-800">Family or Display Name
                     <input autoFocus value={formData.familyName} onChange={e => setFormData({ ...formData, familyName: e.target.value })}
                       placeholder="e.g. Smith" className="mt-1.5 w-full px-4 py-3 rounded-2xl border border-cocoa-200 bg-cream-50 text-[15px] focus:outline-none focus:ring-2 focus:ring-cocoa-400" />
@@ -1357,7 +1357,7 @@
                 <span className="text-5xl">🛒</span>
                 <h2 className="font-display text-3xl font-bold text-cocoa-800">Where do you shop?</h2>
                 <p className="text-sm text-stone-600">Recipeak calculates weekly costs across stores.</p>
-                <div className="space-y-4 bg-white p-5 rounded-3xl border border-cocoa-100 shadow-pearmint text-left">
+                <div className="space-y-4 bg-white p-5 rounded-3xl border border-cocoa-100 shadow-recipeak text-left">
                   <label className="block text-sm font-bold text-cocoa-800">Primary Grocery Store
                     <select value={formData.preferredStore} onChange={e => setFormData({ ...formData, preferredStore: e.target.value })}
                       className="mt-1.5 w-full px-4 py-3 rounded-2xl border border-cocoa-200 bg-cream-50 text-[15px] focus:outline-none focus:ring-2 focus:ring-cocoa-400">
@@ -2454,7 +2454,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
         const hasAvoid = recipeHasAvoid(r);
         const img = r.image || photoUrl(r.title);
         return (
-          <div key={r.id} className={`bg-white rounded-3xl shadow-pearmint-card border overflow-hidden cursor-pointer hover:shadow-pearmint transition-all duration-200 relative ${hasAllergy ? "border-red-400 ring-2 ring-red-100" : hasAvoid ? "border-amber-300" : "border-cocoa-100/70"}`}
+          <div key={r.id} className={`bg-white rounded-3xl shadow-recipeak-card border overflow-hidden cursor-pointer hover:shadow-recipeak transition-all duration-200 relative ${hasAllergy ? "border-red-400 ring-2 ring-red-100" : hasAvoid ? "border-amber-300" : "border-cocoa-100/70"}`}
             onClick={() => { setSelectedRecipe(r); setServingMult(1); setAddToPlannerMode(false); }}>
             {hasAllergy && <div className="absolute top-2.5 left-2.5 z-10 bg-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">⚠ ALLERGY</div>}
             {hasAvoid && !hasAllergy && <div className="absolute top-2.5 left-2.5 z-10 bg-amber-400 text-stone-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">⚠ Avoid</div>}
@@ -2638,7 +2638,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
 
                   if (plannerMeal === "all") {
                     return (
-                      <div key={day} className="bg-white rounded-3xl border border-cocoa-100 p-4 shadow-pearmint-card">
+                      <div key={day} className="bg-white rounded-3xl border border-cocoa-100 p-4 shadow-recipeak-card">
                         <div className="font-bold text-lg text-cocoa-800 mb-1">{day}</div>
                         {renderSlot("breakfast", "Breakfast")}
                         {renderSlot("lunch", "Lunch")}
@@ -2648,7 +2648,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   }
 
                   return (
-                    <div key={day} className="bg-white rounded-3xl border border-cocoa-100 p-4 shadow-pearmint-card">
+                    <div key={day} className="bg-white rounded-3xl border border-cocoa-100 p-4 shadow-recipeak-card">
                       {renderSlot(plannerMeal, plannerMeal)}
                     </div>
                   );
@@ -2658,9 +2658,9 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
 
             {tab === "grocery" && (
               <div className="space-y-4">
-                {/* PEARMINTS-STYLE MULTI-STORE PRICE SUMMARY CARD */}
-               <!-- AFTER (Fixed React state variable + unbranded Recipeak style) -->
-              <div className="bg-white rounded-3xl border border-cocoa-100 p-4 space-y-3 shadow-pearmint-card">
+                {/* RECIPEAK MULTI-STORE PRICE SUMMARY CARD */}
+               {/* Fixed React state variable + unbranded Recipeak style */}
+              <div className="bg-white rounded-3xl border border-cocoa-100 p-4 space-y-3 shadow-recipeak-card">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-bold tracking-wider text-cocoa-600 uppercase">WEEKLY STORE COMPARISON</p>
                   <span className="text-xs text-stone-400 font-bold">{storeComparison.itemsCount} items in cart</span>
@@ -2672,9 +2672,34 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   <p className="text-2xl font-bold">{storeComparison.cheapest.store} saves you the most</p>
                   <p className="text-xs text-cocoa-100 mt-0.5">Save up to ${storeComparison.savings.toFixed(2)} on this week's plan</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-cocoa-600/60 border border-cocoa-500/50 flex items-center justify-center font-display text-xl italic font-bold text-cream-100 flex-shrink-0">
-                  R
-                </div>
+                <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-400/30 flex items-center justify-center flex-shrink-0 shadow-sm">
+      <svg viewBox="0 0 36 36" className="w-9 h-9" aria-hidden="true">
+        <defs>
+          <radialGradient id="tomatoGrad" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stopColor="#ff6b6b" />
+            <stop offset="55%" stopColor="#ee2b2b" />
+            <stop offset="100%" stopColor="#990000" />
+          </radialGradient>
+          <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#51cf66" />
+            <stop offset="100%" stopColor="#2b8a3e" />
+          </linearGradient>
+          <filter id="tomatoShading" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1" floodColor="#4a0000" floodOpacity="0.4" />
+          </filter>
+        </defs>
+        {/* Tomato Body with Shading */}
+        <ellipse cx="18" cy="20" rx="13" ry="11.5" fill="url(#tomatoGrad)" filter="url(#tomatoShading)" />
+        {/* Specular Highlight */}
+        <ellipse cx="13" cy="15" rx="3.5" ry="2" fill="#ffffff" opacity="0.4" transform="rotate(-20 13 15)" />
+        {/* Stem & Leaves */}
+        <path d="M18 10 C18 7, 19 6, 20.5 4.5 C19.5 6.2, 18.5 7.5, 18 9.5 Z" fill="url(#stemGrad)" />
+        <path d="M18 9.5 C16 7.5, 13.5 7.5, 13 8 C15 9.2, 16.5 9.8, 17.5 10.2 Z" fill="url(#stemGrad)" />
+        <path d="M18 9.5 C20 7.5, 22.5 7.5, 23 8 C21 9.2, 19.5 9.8, 18.5 10.2 Z" fill="url(#stemGrad)" />
+        <path d="M18 9.5 C15 10.5, 12.5 11.5, 12 12 C14.2 11.8, 16 11.2, 17.2 10.6 Z" fill="url(#stemGrad)" />
+        <path d="M18 9.5 C21 10.5, 23.5 11.5, 24 12 C21.8 11.8, 20 11.2, 18.8 10.6 Z" fill="url(#stemGrad)" />
+      </svg>
+    </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2.5 pt-1">
@@ -2778,7 +2803,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                             <span className="w-10 text-center">Remove</span>
                           </div>
                           {Object.keys(aisles).sort((a, b) => (storeAisles[a] || 99) - (storeAisles[b] || 99)).map(aisle => (
-                            <div key={aisle} className="bg-white rounded-3xl border border-cocoa-100 shadow-pearmint-card overflow-hidden">
+                            <div key={aisle} className="bg-white rounded-3xl border border-cocoa-100 shadow-recipeak-card overflow-hidden">
                               <div className="px-4 py-3 bg-stone-50 border-b border-stone-100 flex justify-between items-center gap-2">
                                 <span className="font-bold text-base text-stone-800">{aisle}</span>
                                 <div className="flex items-center gap-1.5 text-xs">
@@ -2826,7 +2851,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
 
             {tab === "discover" && (
               <div className="space-y-4">
-                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-pearmint">
+                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-recipeak">
                   <h3 className="font-display text-2xl font-bold text-cocoa-800">What do you have?</h3>
                   <textarea value={discoverIngredients} onChange={e => setDiscoverIngredients(e.target.value)}
                     placeholder="chicken, broccoli, rice, garlic..." rows={2}
@@ -2845,7 +2870,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   </button>
                 </div>
 
-                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-pearmint">
+                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-recipeak">
                   <h3 className="font-display text-2xl font-bold text-cocoa-800">AI Chef</h3>
                   <p className="text-xs text-stone-500 font-semibold leading-relaxed">Creates a full recipe using your specific ingredients and dietary restrictions via Gemini AI.</p>
                   <button onClick={generateAiRecipe} disabled={aiLoading}
@@ -2867,7 +2892,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
 
             {tab === "prefs" && (
               <div className="space-y-5">
-                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-pearmint">
+                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-recipeak">
                   <h3 className="font-bold text-base text-cocoa-800">Account</h3>
                   {account.status === "in" ? (
                     <>
@@ -2882,7 +2907,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   )}
                 </div>
 
-                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-pearmint">
+                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-recipeak">
                   <h3 className="font-bold text-base text-cocoa-800">Family & Targets</h3>
                   <label className="block text-sm font-bold text-stone-700">Family Name
                     <input type="text" value={prefs.familyName || ""} placeholder="e.g. Smith"
@@ -2897,7 +2922,7 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   </label>
                 </div>
 
-                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-pearmint">
+                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-recipeak">
                   <h3 className="font-bold text-base text-cocoa-800">AI & Photo Keys</h3>
                   <label className="block text-sm font-bold text-stone-700">Gemini API Key
                     <input type="password" value={prefs.geminiApiKey || ""} placeholder="AIza..."
