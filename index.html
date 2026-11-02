@@ -1728,8 +1728,25 @@
       const [photoLoading, setPhotoLoading] = useState(false);
       const [photoTarget, setPhotoTarget] = useState(null);
       const [madeThis, setMadeThis] = useState(null);
-      const [madeRating, setMadeRating] = useState(0);
+            const [madeRating, setMadeRating] = useState(0);
       const [madeFavorite, setMadeFavorite] = useState(false);
+      const [accountDetailsOpen, setAccountDetailsOpen] = useState(false);
+      const [newDislikeInput, setNewDislikeInput] = useState("");
+      const [newAllergyInput, setNewAllergyInput] = useState("");
+
+      const addDislike = () => {
+        const val = newDislikeInput.trim().toLowerCase();
+        if (!val) return;
+        setPrefs(p => ({ ...p, avoidIngredients: [...new Set([...(p.avoidIngredients || []), val])] }));
+        setNewDislikeInput("");
+      };
+
+      const addAllergy = () => {
+        const val = newAllergyInput.trim().toLowerCase();
+        if (!val) return;
+        setPrefs(p => ({ ...p, allergies: [...new Set([...(p.allergies || []), val])] }));
+        setNewAllergyInput("");
+      };
 
       const currentWeekKey = getWeekKey(weekOffset);
       const planner = weeks[currentWeekKey] || emptyWeek();
@@ -2456,8 +2473,18 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
         return (
           <div key={r.id} className={`bg-white rounded-3xl shadow-recipeak-card border overflow-hidden cursor-pointer hover:shadow-recipeak transition-all duration-200 relative ${hasAllergy ? "border-red-400 ring-2 ring-red-100" : hasAvoid ? "border-amber-300" : "border-cocoa-100/70"}`}
             onClick={() => { setSelectedRecipe(r); setServingMult(1); setAddToPlannerMode(false); }}>
-            {hasAllergy && <div className="absolute top-2.5 left-2.5 z-10 bg-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">⚠ ALLERGY</div>}
-            {hasAvoid && !hasAllergy && <div className="absolute top-2.5 left-2.5 z-10 bg-amber-400 text-stone-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm">⚠ Avoid</div>}
+            <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start pointer-events-none">
+              {hasAllergy && (
+                <div className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 border border-red-400">
+                  <span>⚠️</span> ALLERGY
+                </div>
+              )}
+              {hasAvoid && (
+                <div className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 border border-amber-300">
+                  <span>🚫</span> DISLIKED
+                </div>
+              )}
+            </div>
             <div className={`${compact ? "h-28" : "h-40"} bg-cream-100 relative`}>
               <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = photoUrl(r.title); }} />
               {!r.image && (r.imgScan || 0) < PHOTO_SCAN_VERSION && <span className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-sm rounded-full px-2 py-0.5 text-[10px] text-cocoa-600 font-bold flex items-center gap-1 shadow-sm"><Spinner size={9} /> finding photo</span>}
@@ -2890,20 +2917,85 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
               </div>
             )}
 
-            {tab === "prefs" && (
+                        {tab === "prefs" && (
               <div className="space-y-5">
-                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-3 shadow-recipeak">
-                  <h3 className="font-bold text-base text-cocoa-800">Account</h3>
-                  {account.status === "in" ? (
-                    <>
-                      <p className="text-sm font-semibold">Signed in as <b>@{account.username}</b> <span className="text-stone-400">({account.email})</span></p>
-                      <button onClick={logOut} className="w-full py-2.5 rounded-2xl bg-stone-100 text-sm font-bold text-stone-700">Log out</button>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm text-stone-600 font-semibold">Using the app on this device only.</p>
-                      {FIREBASE_CONFIG && <button onClick={() => { localStorage.removeItem("fr_mode"); location.reload(); }} className="w-full py-3 rounded-2xl bg-cocoa-600 text-white text-sm font-bold shadow-md">Log in or create an account</button>}
-                    </>
+                {/* Account & Preferences Accordion */}
+                <div className="bg-white rounded-3xl border border-cocoa-100 p-5 space-y-4 shadow-recipeak">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-cocoa-800">Account & Profile</h3>
+                      {account.status === "in" ? (
+                        <p className="text-xs text-stone-500 font-semibold mt-0.5">Signed in as <b className="text-cocoa-700">@{account.username}</b> ({account.email})</p>
+                      ) : (
+                        <p className="text-xs text-stone-500 font-semibold mt-0.5">Using locally on this device</p>
+                      )}
+                    </div>
+                    <button onClick={() => setAccountDetailsOpen(!accountDetailsOpen)} className="px-3.5 py-1.5 rounded-xl bg-cocoa-50 text-cocoa-700 text-xs font-extrabold border border-cocoa-200 shadow-sm flex items-center gap-1">
+                      {accountDetailsOpen ? "Hide Settings ▲" : "Manage Settings ▼"}
+                    </button>
+                  </div>
+
+                  {accountDetailsOpen && (
+                    <div className="pt-3 border-t border-stone-100 space-y-5 animate-fadeIn">
+                      {/* Dietary Dislikes & Allergies */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-cocoa-600">Dietary Dislikes & Allergies</h4>
+                        <div>
+                          <label className="block text-xs font-bold text-amber-800 mb-1">🚫 Disliked Foods / Ingredients</label>
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {(prefs.avoidIngredients || []).map(item => (
+                              <span key={item} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                🚫 {item}
+                                <button onClick={() => setPrefs(p => ({ ...p, avoidIngredients: p.avoidIngredients.filter(x => x !== item) }))} className="hover:text-red-700 font-black ml-0.5">✕</button>
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <input value={newDislikeInput} onChange={e => setNewDislikeInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addDislike(); } }} placeholder="Add disliked ingredient (e.g. mushrooms)..." className="flex-1 px-3.5 py-2 rounded-xl border border-stone-200 text-xs font-semibold bg-cream-50" />
+                            <button onClick={addDislike} className="px-3.5 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl shadow-sm">Add</button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-red-800 mb-1">⚠️ Severe Allergies</label>
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {(prefs.allergies || []).map(item => (
+                              <span key={item} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-900 border border-red-200">
+                                ⚠️ {item}
+                                <button onClick={() => setPrefs(p => ({ ...p, allergies: p.allergies.filter(x => x !== item) }))} className="hover:text-red-900 font-black ml-0.5">✕</button>
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <input value={newAllergyInput} onChange={e => setNewAllergyInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addAllergy(); } }} placeholder="Add severe allergy (e.g. peanuts, shellfish)..." className="flex-1 px-3.5 py-2 rounded-xl border border-stone-200 text-xs font-semibold bg-cream-50" />
+                            <button onClick={addAllergy} className="px-3.5 py-2 bg-red-600 text-white text-xs font-bold rounded-xl shadow-sm">Add</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Weekly Budget Changer Slider */}
+                      <div className="pt-2 border-t border-stone-100 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-xs font-extrabold uppercase tracking-wider text-cocoa-600">Weekly Grocery Budget</label>
+                          <span className="text-base font-black text-emerald-800">${prefs.weeklyBudget || 120} / wk</span>
+                        </div>
+                        <input type="range" min="50" max="500" step="10" value={prefs.weeklyBudget || 120} onChange={e => setPrefs(p => ({ ...p, weeklyBudget: e.target.value }))} className="w-full accent-cocoa-600 h-2 bg-stone-200 rounded-lg cursor-pointer" />
+                        <div className="flex justify-between text-[10px] text-stone-400 font-bold">
+                          <span>$50</span>
+                          <span>$250</span>
+                          <span>$500+</span>
+                        </div>
+                      </div>
+
+                      {/* Account Actions */}
+                      <div className="pt-2 border-t border-stone-100">
+                        {account.status === "in" ? (
+                          <button onClick={logOut} className="w-full py-2.5 rounded-2xl bg-stone-100 text-xs font-bold text-stone-700 hover:bg-stone-200 transition">Log out</button>
+                        ) : (
+                          FIREBASE_CONFIG && <button onClick={() => { localStorage.removeItem("fr_mode"); location.reload(); }} className="w-full py-3 rounded-2xl bg-cocoa-600 text-white text-xs font-bold shadow-md">Log in or create an account</button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -2912,13 +3004,13 @@ Style: ${style}. Prefer ${prefs.priorityNutrient || "protein"}. Servings ~${pref
                   <label className="block text-sm font-bold text-stone-700">Family Name
                     <input type="text" value={prefs.familyName || ""} placeholder="e.g. Smith"
                       onChange={e => setPrefs(p => ({ ...p, familyName: e.target.value }))}
-                      className="mt-1 w-full px-4 py-2.5 rounded-2xl border border-cocoa-200 bg-cream-50 font-semibold" />
+                      className="mt-1 w-full px-4 py-2.5 rounded-2xl border border-cocoa-200 bg-cream-50 font-semibold text-sm" />
                   </label>
                   <label className="block text-sm font-bold text-stone-700">Family size
-                    <input type="number" min="1" value={prefs.familySize} onChange={e => setPrefs(p => ({ ...p, familySize: Number(e.target.value) || 1 }))} className="mt-1 w-full px-4 py-2.5 rounded-2xl border border-cocoa-200 bg-cream-50 font-bold" />
+                    <input type="number" min="1" value={prefs.familySize} onChange={e => setPrefs(p => ({ ...p, familySize: Number(e.target.value) || 1 }))} className="mt-1 w-full px-4 py-2.5 rounded-2xl border border-cocoa-200 bg-cream-50 font-bold text-sm" />
                   </label>
                   <label className="block text-sm font-bold text-stone-700">Daily calorie target (per person)
-                    <input type="number" value={prefs.calorieTarget} onChange={e => setPrefs(p => ({ ...p, calorieTarget: Number(e.target.value) || 2000 }))} className="mt-1 w-full px-4 py-2.5 rounded-2xl border border-cocoa-200 bg-cream-50 font-bold" />
+                    <input type="number" value={prefs.calorieTarget} onChange={e => setPrefs(p => ({ ...p, calorieTarget: Number(e.target.value) || 2000 }))} className="mt-1 w-full px-4 py-2.5 rounded-2xl border border-cocoa-200 bg-cream-50 font-bold text-sm" />
                   </label>
                 </div>
 
